@@ -4,30 +4,14 @@ import { authClient } from '../../lib/auth-client'
 
 export const Route = createFileRoute('/auth/signin')({ component: Signin })
 
+
+
 function Signin() {
-    async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
-        event.preventDefault()
-
-        const formData = new FormData(event.currentTarget)
-        const email = String(formData.get('email') ?? '')
-        const password = String(formData.get('password') ?? '')
-        const rememberMe = formData.get('rememberMe') === 'on'
-
-        await authClient.signIn.email(
-            {
-                email,
-                password,
-                rememberMe,
-                callbackURL: '/',
-            },
-            {
-                onRequest: () => { },
-                onSuccess: () => { },
-                onError: (ctx) => {
-                    alert(ctx.error.message)
-                },
-            },
-        )
+    async function signInWithMitID() {
+        await authClient.signIn.social({
+            provider: "mitid",
+            callbackURL: "http://localhost:3001/auth/profile",
+        })
     }
 
     return (
@@ -46,51 +30,9 @@ function Signin() {
                         </h1>
                     </div>
 
-                    <form className="space-y-5" onSubmit={handleSubmit}>
-                        <Input
-                            required
-                            name="email"
-                            type="email"
-                            fullWidth
-                            placeholder="you@example.com"
-                        />
-
-                        <Input
-                            required
-                            name="password"
-                            type="password"
-                            fullWidth
-                            placeholder="Enter your password"
-                        />
-
-                        <div className="flex items-center justify-between gap-3">
-                            <Checkbox name="rememberMe">
-                                <Checkbox.Content>
-                                    <Checkbox.Control>
-                                        <Checkbox.Indicator />
-                                    </Checkbox.Control>
-                                    Remeber Me
-                                </Checkbox.Content>
-                            </Checkbox>
-                            <button type="button" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
-                                Forgot password?
-                            </button>
-                        </div>
-
-                        <Button
-                            type="submit"
-                            className="h-12 w-full rounded-xl bg-slate-950 font-medium text-white shadow-lg shadow-slate-900/15 hover:bg-slate-800"
-                        >
-                            Sign in
-                        </Button>
-                    </form>
-
-                    <p className="mt-6 text-center text-sm text-slate-500">
-                        Don't have an account?{' '}
-                        <button type="button" className="font-semibold text-slate-900 transition hover:text-slate-700">
-                            Create one
-                        </button>
-                    </p>
+                    <div className="flex items-center justify-between gap-3">
+                        <Button onClick={signInWithMitID} className="h-12 w-full rounded-xl">Sign in with MitID</Button>
+                    </div>
                 </div>
             </Card>
         </div>
