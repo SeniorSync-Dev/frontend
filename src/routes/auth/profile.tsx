@@ -23,6 +23,10 @@ function Profile() {
                     <p>Welcome to your profile page!</p>
                     <p>Email: {session.user.email}</p>
                     <p>Username: {session.user.name}</p>
+                    <p>Birthdate: {session.user.birthdate}</p>
+                    <p>NIN: {session.user.nin}</p>
+                    <p>MITID UUID: {session.user.mitidUuid}</p>
+                    <p>Role: {session.user.role}</p>
                     <Button type="button" onClick={() => authClient.signOut()}>
                         Sign Out
                     </Button>
