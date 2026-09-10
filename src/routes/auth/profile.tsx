@@ -10,8 +10,14 @@ function Profile() {
   const { data: session, isPending, error, refetch } = authClient.useSession()
 
   async function signOut() {
-    //TODO: Det her virker ikke helt endnu som det skal.
-    await authClient.signOut({ callbackURL: `${window.location.origin}/auth/signin` })
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          // Redirect or update state after sign out
+          navigate({ to: '/auth/signin' });
+        },
+      },
+    });
   }
 
   if (isPending) {
