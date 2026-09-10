@@ -1,41 +1,34 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Button, Chip } from '@heroui/react'
-import { authClient } from '../lib/auth-client'
+import { Button } from '@heroui/react'
 
 export const Route = createFileRoute('/')({ component: Home })
 
 function Home() {
   const navigate = useNavigate()
-  const { data: session, isPending } = authClient.useSession()
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-      <section className="mx-auto flex max-w-2xl flex-col items-center text-center">
-        <Chip variant="soft" color="accent" size="sm">
-          <Chip.Label>Velkommen til SeniorSync</Chip.Label>
-        </Chip>
-        <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">
-          Få dit overblik
-        </h1>
-        <p className="mt-5 text-lg text-muted">
-          Log ind med MitID for at få adgang til dine oplysninger og tjenester.
-        </p>
+    <div className="flex flex-1 items-center justify-center px-4 py-16">
+      <section className="flex w-full max-w-sm flex-col items-center text-center">
+        <h1 className="text-3xl font-semibold tracking-tight">SeniorSync</h1>
+        <p className="mt-3 text-muted">Vælg hvordan du vil logge ind.</p>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          {!isPending && session ? (
-            <Button variant="primary" size="lg" onPress={() => navigate({ to: '/auth/profile' })}>
-              Gå til min profil
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              size="lg"
-              isDisabled={isPending}
-              onPress={() => navigate({ to: '/auth/signin' })}
-            >
-              Log ind med MitID
-            </Button>
-          )}
+        <div className="mt-8 flex w-full flex-col gap-3">
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onPress={() => navigate({ to: '/auth/signin', search: { as: 'borger' } })}
+          >
+            Log ind som borger
+          </Button>
+          <Button
+            variant="secondary"
+            size="lg"
+            fullWidth
+            onPress={() => navigate({ to: '/auth/signin', search: { as: 'paaroerende' } })}
+          >
+            Log ind som pårørende
+          </Button>
         </div>
       </section>
     </div>

@@ -3,7 +3,10 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Alert, Button, Card } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
 
+type LoginAs = 'borger' | 'paaroerende'
+
 type SigninSearch = {
+  as?: LoginAs
   error?: string
   error_description?: string
 }
@@ -11,11 +14,17 @@ type SigninSearch = {
 export const Route = createFileRoute('/auth/signin')({
   component: Signin,
   validateSearch: (search: Record<string, unknown>): SigninSearch => ({
+    as: search.as === 'borger' || search.as === 'paaroerende' ? search.as : undefined,
     error: typeof search.error === 'string' ? search.error : undefined,
     error_description:
       typeof search.error_description === 'string' ? search.error_description : undefined,
   }),
 })
+
+const loginAsLabel: Record<LoginAs, string> = {
+  borger: 'borger',
+  paaroerende: 'pårørende',
+}
 
 type AuthError = {
   status: 'default' | 'warning' | 'danger'
@@ -30,7 +39,7 @@ function describeAuthError(code?: string, description?: string): AuthError | nul
     case 'IDP-3200':
     case 'access_denied':
       return {
-        status: 'default' as const,
+        status: 'default',
         title: 'Login blev afbrudt',
         text: 'Du afbrød MitID-login. Du kan prøve igen, når du er klar.',
       }
@@ -38,13 +47,13 @@ function describeAuthError(code?: string, description?: string): AuthError | nul
     case 'invalid_state':
     case 'state_not_found':
       return {
-        status: 'warning' as const,
+        status: 'warning',
         title: 'Login udløb',
         text: 'Der gik for lang tid, eller siden blev åbnet i en anden browser. Prøv igen.',
       }
     default:
       return {
-        status: 'danger' as const,
+        status: 'danger',
         title: 'Login mislykkedes',
         text: description || 'Der opstod en fejl under login. Prøv venligst igen.',
       }
@@ -53,7 +62,7 @@ function describeAuthError(code?: string, description?: string): AuthError | nul
 
 function Signin() {
   const navigate = Route.useNavigate()
-  const { error: errorCode, error_description } = Route.useSearch()
+  const { as: loginAs, error: errorCode, error_description } = Route.useSearch()
   const [isLoading, setIsLoading] = useState(false)
   const [authError, setAuthError] = useState<AuthError | null>(() =>
     describeAuthError(errorCode, error_description),
@@ -63,36 +72,39 @@ function Signin() {
   useEffect(() => {
     if (!errorCode) return
     setAuthError(describeAuthError(errorCode, error_description))
-    navigate({ search: {}, replace: true })
-  }, [errorCode, error_description, navigate])
+    navigate({ search: { as: loginAs }, replace: true })
+  }, [errorCode, error_description, loginAs, navigate])
 
-  async function signInWithMitID() {
-    setIsLoading(true)
-    setAuthError(null)
-    try {
-      await authClient.signIn.social({
-        provider: 'mitid',
-        callbackURL: `${window.location.origin}/auth/profile`,
-        errorCallbackURL: `${window.location.origin}/auth/signin`,
-      })
-    } catch {
-      setAuthError({
-        status: 'danger',
-        title: 'Noget gik galt',
-        text: 'Login mislykkedes. Prøv venligst igen.',
-      })
-      setIsLoading(false)
-    }
+  function signInWithMitID() {
+    authClient.signIn.social({
+      provider: 'mitid',
+      callbackURL: `${window.location.origin}/auth/profile`,
+      errorCallbackURL: `${window.location.origin}/auth/signin`,
+      fetchOptions: {
+        onRequest: () => {
+          setIsLoading(true)
+          setAuthError(null)
+        },
+        onError: (ctx) => {
+          setIsLoading(false)
+          setAuthError({
+            status: 'danger',
+            title: 'Noget gik galt',
+            text: ctx.error.message || 'Login mislykkedes. Prøv venligst igen.',
+          })
+        },
+      },
+    })
   }
 
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-16">
       <Card className="w-full max-w-md">
         <Card.Header className="items-center text-center">
-          <Card.Title className="text-2xl h-8">Log ind</Card.Title>
-          <Card.Description>
-            Brug dit MitID for at logge sikkert ind.
-          </Card.Description>
+          <Card.Title className="text-2xl h-8">
+            {loginAs ? `Log ind som ${loginAsLabel[loginAs]}` : 'Log ind'}
+          </Card.Title>
+          <Card.Description>Brug dit MitID for at logge sikkert ind.</Card.Description>
         </Card.Header>
 
         <Card.Content className="flex flex-col gap-4">

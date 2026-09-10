@@ -1,5 +1,4 @@
 import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { SiteHeader } from '../components/site-header'
 import '../styles.css'
 
 export const Route = createRootRoute({
@@ -7,17 +6,16 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
-    const startYear = 2026
+  const startYear = 2026
   const currentYear = new Date().getFullYear()
   const yearRange = currentYear > startYear ? `${startYear} - ${currentYear}` : `${startYear}`
-  
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <SiteHeader />
       <main className="flex flex-1 flex-col">
         <Outlet />
       </main>
-      <footer className="border-t border-border py-6 text-center text-sm txt-muted">
+      <footer className="border-t border-border py-6 text-center text-sm text-muted">
         © {yearRange} SeniorSync
       </footer>
     </div>

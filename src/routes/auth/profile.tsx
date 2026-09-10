@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Alert, Avatar, Button, Card, Chip, Spinner } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
-import { getInitials } from '../../components/site-header'
+import { getInitials } from '../../lib/initials'
 
 export const Route = createFileRoute('/auth/profile')({ component: Profile })
 
@@ -9,15 +9,13 @@ function Profile() {
   const navigate = useNavigate()
   const { data: session, isPending, error, refetch } = authClient.useSession()
 
-  async function signOut() {
-    await authClient.signOut({
+  function signOut() {
+    authClient.signOut({
       fetchOptions: {
-        onSuccess: () => {
-          // Redirect or update state after sign out
-          navigate({ to: '/auth/signin' });
-        },
+        // TODO: This still doens't work because it sendes us to signicat logout page instead.
+        onSuccess: () => navigate({ to: '/auth/signin' }),
       },
-    });
+    })
   }
 
   if (isPending) {
