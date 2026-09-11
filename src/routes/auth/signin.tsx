@@ -68,7 +68,6 @@ function Signin() {
     describeAuthError(errorCode, error_description),
   )
 
-  // Læs fejlen fra URL'en én gang, og erstat så den lange URL med en ren /auth/signin.
   useEffect(() => {
     if (!errorCode) return
     setAuthError(describeAuthError(errorCode, error_description))
