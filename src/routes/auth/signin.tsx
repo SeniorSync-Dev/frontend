@@ -26,6 +26,13 @@ const loginAsLabel: Record<LoginAs, string> = {
   paaroerende: 'pårørende',
 }
 
+type AccountType = 'citizen' | 'relative'
+
+const loginAsAccountType: Record<LoginAs, AccountType> = {
+  borger: 'citizen',
+  paaroerende: 'relative',
+}
+
 type AuthError = {
   status: 'default' | 'warning' | 'danger'
   title: string
@@ -79,6 +86,9 @@ function Signin() {
       provider: 'mitid',
       callbackURL: `${window.location.origin}/auth/profile`,
       errorCallbackURL: `${window.location.origin}/auth/signin`,
+      additionalData: {
+        accountType: loginAs ? loginAsAccountType[loginAs] : 'relative',
+      },
       fetchOptions: {
         onRequest: () => {
           setIsLoading(true)
