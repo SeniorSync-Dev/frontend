@@ -1,43 +1,153 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { Button, Card } from '@heroui/react'
+import { useEffect, useState } from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { Alert, Button, Card } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
 
-export const Route = createFileRoute('/auth/signin')({ component: Signin })
+type LoginAs = 'borger' | 'paaroerende'
 
+type SigninSearch = {
+  as?: LoginAs
+  error?: string
+  error_description?: string
+}
 
+export const Route = createFileRoute('/auth/signin')({
+  component: Signin,
+  validateSearch: (search: Record<string, unknown>): SigninSearch => ({
+    as: search.as === 'borger' || search.as === 'paaroerende' ? search.as : undefined,
+    error: typeof search.error === 'string' ? search.error : undefined,
+    error_description:
+      typeof search.error_description === 'string' ? search.error_description : undefined,
+  }),
+})
+
+const loginAsLabel: Record<LoginAs, string> = {
+  borger: 'borger',
+  paaroerende: 'pårørende',
+}
+
+type AccountType = 'citizen' | 'relative'
+
+const loginAsAccountType: Record<LoginAs, AccountType> = {
+  borger: 'citizen',
+  paaroerende: 'relative',
+}
+
+type AuthError = {
+  status: 'default' | 'warning' | 'danger'
+  title: string
+  text: string
+}
+
+function describeAuthError(code?: string, description?: string): AuthError | null {
+  if (!code) return null
+
+  switch (code) {
+    case 'IDP-3200':
+    case 'access_denied':
+      return {
+        status: 'default',
+        title: 'Login blev afbrudt',
+        text: 'Du afbrød MitID-login. Du kan prøve igen, når du er klar.',
+      }
+    case 'state_mismatch':
+    case 'invalid_state':
+    case 'state_not_found':
+      return {
+        status: 'warning',
+        title: 'Login udløb',
+        text: 'Der gik for lang tid, eller siden blev åbnet i en anden browser. Prøv igen.',
+      }
+    default:
+      return {
+        status: 'danger',
+        title: 'Login mislykkedes',
+        text: description || 'Der opstod en fejl under login. Prøv venligst igen.',
+      }
+  }
+}
 
 function Signin() {
-    async function signInWithMitID() {
-        await authClient.signIn.social({
-            provider: "mitid",
-            callbackURL: "http://localhost:3001/auth/profile",
-            additionalData: {
-                accountType: "relative",
-            },
-        })
-    }
+  const navigate = Route.useNavigate()
+  const { as: loginAs, error: errorCode, error_description } = Route.useSearch()
+  const [isLoading, setIsLoading] = useState(false)
+  const [authError, setAuthError] = useState<AuthError | null>(() =>
+    describeAuthError(errorCode, error_description),
+  )
 
-    return (
-        <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.18),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.18),_transparent_30%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_100%)] px-4 py-12 text-slate-900">
-            <Card className="w-full max-w-md border border-slate-200/80 bg-white/80 shadow-[0_24px_80px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl">
-                <div className="p-7 sm:p-8">
-                    <div className="mb-8 text-center">
-                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-lg font-semibold text-white shadow-lg shadow-slate-900/15">
-                            S
-                        </div>
-                        <p className="text-xs font-medium uppercase tracking-[0.28em] text-slate-500">
-                            Welcome back
-                        </p>
-                        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-                            Sign in
-                        </h1>
-                    </div>
+  useEffect(() => {
+    if (!errorCode) return
+    setAuthError(describeAuthError(errorCode, error_description))
+    navigate({ search: { as: loginAs }, replace: true })
+  }, [errorCode, error_description, loginAs, navigate])
 
-                    <div className="flex items-center justify-between gap-3">
-                        <Button onClick={signInWithMitID} className="h-12 w-full rounded-xl">Sign in with MitID</Button>
-                    </div>
-                </div>
-            </Card>
-        </div>
-    )
+  function signInWithMitID() {
+    authClient.signIn.social({
+      provider: 'mitid',
+      callbackURL: `${window.location.origin}/auth/profile`,
+      errorCallbackURL: `${window.location.origin}/auth/signin`,
+      additionalData: {
+        accountType: loginAs ? loginAsAccountType[loginAs] : 'relative',
+      },
+      fetchOptions: {
+        onRequest: () => {
+          setIsLoading(true)
+          setAuthError(null)
+        },
+        onError: (ctx) => {
+          setIsLoading(false)
+          setAuthError({
+            status: 'danger',
+            title: 'Noget gik galt',
+            text: ctx.error.message || 'Login mislykkedes. Prøv venligst igen.',
+          })
+        },
+      },
+    })
+  }
+
+  return (
+    <div className="flex flex-1 items-center justify-center px-4 py-16">
+      <Card className="w-full max-w-md">
+        <Card.Header className="items-center text-center">
+          <Card.Title className="text-2xl h-8">
+            {loginAs ? `Log ind som ${loginAsLabel[loginAs]}` : 'Log ind'}
+          </Card.Title>
+          <Card.Description>Brug dit MitID for at logge sikkert ind.</Card.Description>
+        </Card.Header>
+
+        <Card.Content className="flex flex-col gap-4">
+          {authError && (
+            <Alert status={authError.status}>
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Title>{authError.title}</Alert.Title>
+                <Alert.Description>{authError.text}</Alert.Description>
+              </Alert.Content>
+            </Alert>
+          )}
+
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            isPending={isLoading}
+            onPress={signInWithMitID}
+          >
+            {isLoading
+              ? 'Sender dig til MitID…'
+              : authError
+                ? 'Prøv igen med MitID'
+                : 'Log ind med MitID'}
+          </Button>
+        </Card.Content>
+
+        <Card.Footer className="justify-center text-sm text-muted">
+          <Link to="/" className="underline-offset-4 hover:underline">
+            Tilbage til forsiden
+          </Link>
+        </Card.Footer>
+      </Card>
+    </div>
+  )
 }
