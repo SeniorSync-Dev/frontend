@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Button, Card, Checkbox, Input } from '@heroui/react'
+import { Button, Card } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
 
 export const Route = createFileRoute('/auth/signin')({ component: Signin })
@@ -11,6 +11,9 @@ function Signin() {
         await authClient.signIn.social({
             provider: "mitid",
             callbackURL: "http://localhost:3001/auth/profile",
+            additionalData: {
+                accountType: "relative",
+            },
         })
     }
 
