@@ -14,6 +14,7 @@ import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminSigninRouteImport } from './routes/admin/signin'
 import { Route as AuthProfileRouteImport } from './routes/auth/profile'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
+import { Route as AuthAcceptInvitationInvitationIdRouteImport } from './routes/auth/accept-invitation.$invitationId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,12 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
   path: '/auth/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthAcceptInvitationInvitationIdRoute =
+  AuthAcceptInvitationInvitationIdRouteImport.update({
+    id: '/auth/accept-invitation/$invitationId',
+    path: '/auth/accept-invitation/$invitationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +54,7 @@ export interface FileRoutesByFullPath {
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +62,7 @@ export interface FileRoutesByTo {
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,6 +71,7 @@ export interface FileRoutesById {
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -71,6 +81,7 @@ export interface FileRouteTypes {
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
+    | '/auth/accept-invitation/$invitationId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -78,6 +89,7 @@ export interface FileRouteTypes {
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
+    | '/auth/accept-invitation/$invitationId'
   id:
     | '__root__'
     | '/'
@@ -85,6 +97,7 @@ export interface FileRouteTypes {
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
+    | '/auth/accept-invitation/$invitationId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -93,6 +106,7 @@ export interface RootRouteChildren {
   AdminSigninRoute: typeof AdminSigninRoute
   AuthProfileRoute: typeof AuthProfileRoute
   AuthSigninRoute: typeof AuthSigninRoute
+  AuthAcceptInvitationInvitationIdRoute: typeof AuthAcceptInvitationInvitationIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -132,6 +146,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/accept-invitation/$invitationId': {
+      id: '/auth/accept-invitation/$invitationId'
+      path: '/auth/accept-invitation/$invitationId'
+      fullPath: '/auth/accept-invitation/$invitationId'
+      preLoaderRoute: typeof AuthAcceptInvitationInvitationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -141,6 +162,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSigninRoute: AdminSigninRoute,
   AuthProfileRoute: AuthProfileRoute,
   AuthSigninRoute: AuthSigninRoute,
+  AuthAcceptInvitationInvitationIdRoute: AuthAcceptInvitationInvitationIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

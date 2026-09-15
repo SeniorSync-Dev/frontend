@@ -1,125 +1,275 @@
 import { useEffect, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { Alert, Spinner } from '@heroui/react'
-import { API_BASE_URL } from '../../lib/auth-client'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Alert, Button, Card, Input, Spinner } from '@heroui/react'
+import { authClient } from '../../lib/auth-client'
 
 export const Route = createFileRoute('/admin/dashboard')({
   component: RouteComponent,
 })
 
-const ROLES = ['citizen', 'relative', 'employee', 'systemAdmin'] as const
-type Role = (typeof ROLES)[number]
+const roleLabels = {
+  citizen: 'Borger',
+  relative: 'Pårørende',
+  employee: 'Medarbejder',
+  systemAdmin: 'Systemadministrator',
+} as const
 
-type AdminUser = {
-  id: string
-  name: string
-  email: string
-  image: string | null
-  createdAt: string
-  role: Role | null
+type OrgRole = keyof typeof roleLabels
+
+function RoleSelect({ value, onChange }: { value: string; onChange: (role: OrgRole) => void }) {
+  return (
+    <select
+      className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+      value={value}
+      onChange={(e) => onChange(e.target.value as OrgRole)}
+    >
+      {Object.entries(roleLabels).map(([role, label]) => (
+        <option key={role} value={role}>
+          {label}
+        </option>
+      ))}
+    </select>
+  )
 }
 
-async function fetchUsers(): Promise<AdminUser[]> {
-  const res = await fetch(`${API_BASE_URL}/api/admin/users`, { credentials: 'include' })
-  if (!res.ok) throw new Error(`Kunne ikke hente brugere (${res.status})`)
-  const { users } = (await res.json()) as { users: AdminUser[] }
-  return users
-}
-
-async function setUserRole(userId: string, role: Role) {
-  const res = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ role }),
-  })
-  if (!res.ok) throw new Error(`Kunne ikke opdatere rolle (${res.status})`)
-}
+type Member = { id: string; role: string; user: { name: string; email: string } }
+type Invitation = { id: string; email: string; role: string; status: string }
 
 function RouteComponent() {
-  const [users, setUsers] = useState<AdminUser[] | null>(null)
+  const navigate = useNavigate()
+  const { data: session, isPending: isSessionPending } = authClient.useSession()
+  const { data: organizations, refetch: refetchOrganizations } = authClient.useListOrganizations()
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
+  const organization = organizations?.find((org) => org.id === selectedOrgId) ?? organizations?.[0]
+
+  const [members, setMembers] = useState<Array<Member>>([])
+  const [invitations, setInvitations] = useState<Array<Invitation>>([])
   const [error, setError] = useState<string | null>(null)
-  const [pendingUserId, setPendingUserId] = useState<string | null>(null)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState<OrgRole>('citizen')
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
-  function loadUsers() {
-    setError(null)
-    fetchUsers()
-      .then(setUsers)
-      .catch((err: Error) => setError(err.message))
-  }
+  async function reload() {
+    if (!organization) return
+    const [{ data: memberData, error: memberError }, { data: invitationData, error: invitationError }] =
+      await Promise.all([
+        authClient.organization.listMembers({ query: { organizationId: organization.id } }),
+        authClient.organization.listInvitations({ query: { organizationId: organization.id } }),
+      ])
 
-  useEffect(loadUsers, [])
-
-  async function handleRoleChange(userId: string, role: Role) {
-    setPendingUserId(userId)
-    setError(null)
-    try {
-      await setUserRole(userId, role)
-      setUsers((prev) => prev && prev.map((u) => (u.id === userId ? { ...u, role } : u)))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kunne ikke opdatere rolle')
-    } finally {
-      setPendingUserId(null)
+    if (memberError || invitationError) {
+      setError(memberError?.message ?? invitationError?.message ?? 'Kunne ikke hente organisationsdata.')
+    } else {
+      setMembers(memberData?.members ?? [])
+      setInvitations(invitationData ?? [])
     }
   }
 
+  useEffect(() => {
+    reload()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization?.id])
+
+  async function handleInvite(e: React.FormEvent) {
+    e.preventDefault()
+    if (!organization || !inviteEmail) return
+
+    const { error: inviteError } = await authClient.organization.inviteMember({
+      organizationId: organization.id,
+      email: inviteEmail,
+      role: inviteRole,
+    })
+    if (inviteError) {
+      setError(inviteError.message ?? 'Kunne ikke oprette invitationen.')
+      return
+    }
+    setInviteEmail('')
+    await reload()
+  }
+
+  async function copyInvitationLink(invitationId: string) {
+    await navigator.clipboard.writeText(`${window.location.origin}/auth/accept-invitation/${invitationId}`)
+    setCopiedId(invitationId)
+  }
+
+  if (isSessionPending) {
+    return (
+      <div className="flex flex-1 items-center justify-center py-24">
+        <Spinner size="lg" color="accent" aria-label="Henter…" />
+      </div>
+    )
+  }
+
+  if (!session) {
+    return (
+      <div className="flex flex-1 items-center justify-center px-4 py-16">
+        <Card className="w-full max-w-md">
+          <Card.Header className="items-center text-center">
+            <Card.Title>Du er ikke logget ind</Card.Title>
+            <Card.Description>Log ind som medarbejder for at administrere organisationen.</Card.Description>
+          </Card.Header>
+          <Card.Footer className="justify-center">
+            <Button variant="primary" onPress={() => navigate({ to: '/admin/signin' })}>
+              Log ind
+            </Button>
+          </Card.Footer>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!organization) {
+    return (
+      <div className="flex flex-1 items-center justify-center px-4 py-16">
+        <Card className="w-full max-w-md">
+          <Card.Header className="items-center text-center">
+            <Card.Title>Ingen organisation fundet</Card.Title>
+            <Card.Description>Opret organisationen for at komme i gang.</Card.Description>
+          </Card.Header>
+          <Card.Footer className="justify-center">
+            <Button
+              variant="primary"
+              onPress={() =>
+                authClient.organization
+                  .create({ name: 'SeniorSync', slug: 'seniorsync' })
+                  .then(() => refetchOrganizations())
+              }
+            >
+              Opret organisation
+            </Button>
+          </Card.Footer>
+        </Card>
+      </div>
+    )
+  }
+
+  const pendingInvitations = invitations.filter((invitation) => invitation.status === 'pending')
+
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-16">
-      <h1 className="text-2xl font-semibold tracking-tight">Brugere</h1>
-      <p className="mt-1 text-muted">Se alle brugere og tildel dem en rolle.</p>
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-12 sm:px-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <h1 className="text-2xl font-semibold">{organization.name}</h1>
+        {organizations && organizations.length > 1 && (
+          <select
+            aria-label="Organisation"
+            className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+            value={organization.id}
+            onChange={(e) => {
+              setSelectedOrgId(e.target.value)
+              authClient.organization.setActive({ organizationId: e.target.value })
+            }}
+          >
+            {organizations.map((org) => (
+              <option key={org.id} value={org.id}>
+                {org.name}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
 
       {error && (
-        <Alert status="danger" className="mt-4">
+        <Alert status="danger">
           <Alert.Indicator />
           <Alert.Content>
-            <Alert.Title>Noget gik galt</Alert.Title>
+            <Alert.Title>Der opstod en fejl</Alert.Title>
             <Alert.Description>{error}</Alert.Description>
           </Alert.Content>
         </Alert>
       )}
 
-      {!users && !error && (
-        <div className="mt-8 flex justify-center">
-          <Spinner size="lg" color="accent" aria-label="Henter brugere" />
-        </div>
-      )}
+      <Card>
+        <Card.Header>
+          <Card.Title>Medlemmer</Card.Title>
+        </Card.Header>
+        <Card.Content className="flex flex-col gap-3">
+          {members.length === 0 ? (
+            <p className="text-sm text-muted">Ingen medlemmer endnu.</p>
+          ) : (
+            members.map((member) => (
+              <div
+                key={member.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-4 py-3"
+              >
+                <div>
+                  <p className="text-sm font-medium">{member.user.name}</p>
+                  <p className="text-sm text-muted">{member.user.email}</p>
+                </div>
+                <RoleSelect
+                  value={member.role}
+                  onChange={(role) =>
+                    authClient.organization
+                      .updateMemberRole({ organizationId: organization.id, memberId: member.id, role })
+                      .then(reload)
+                  }
+                />
+              </div>
+            ))
+          )}
+        </Card.Content>
+      </Card>
 
-      {users && (
-        <table className="mt-6 w-full border-collapse text-left text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="py-2 pr-4 font-medium">Navn</th>
-              <th className="py-2 pr-4 font-medium">Email</th>
-              <th className="py-2 pr-4 font-medium">Rolle</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id} className="border-b">
-                <td className="py-2 pr-4">{user.name}</td>
-                <td className="py-2 pr-4">{user.email}</td>
-                <td className="py-2 pr-4">
-                  <select
-                    className="rounded border bg-transparent px-2 py-1"
-                    value={user.role ?? ''}
-                    disabled={pendingUserId === user.id}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value as Role)}
+      <Card>
+        <Card.Header>
+          <Card.Title>Inviter nyt medlem</Card.Title>
+          <Card.Description>Der sendes ingen e-mail — kopiér linket herunder og del det selv.</Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <form onSubmit={handleInvite} className="flex flex-wrap items-end gap-3">
+            <Input
+              type="email"
+              required
+              placeholder="navn@eksempel.dk"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              className="min-w-[220px] flex-1"
+            />
+            <RoleSelect value={inviteRole} onChange={setInviteRole} />
+            <Button type="submit" variant="primary">
+              Opret invitation
+            </Button>
+          </form>
+        </Card.Content>
+      </Card>
+
+      <Card>
+        <Card.Header>
+          <Card.Title>Afventende invitationer</Card.Title>
+        </Card.Header>
+        <Card.Content className="flex flex-col gap-3">
+          {pendingInvitations.length === 0 ? (
+            <p className="text-sm text-muted">Ingen afventende invitationer.</p>
+          ) : (
+            pendingInvitations.map((invitation) => (
+              <div
+                key={invitation.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-4 py-3"
+              >
+                <div>
+                  <p className="text-sm font-medium">{invitation.email}</p>
+                  <p className="text-sm text-muted">
+                    {roleLabels[invitation.role as OrgRole] ?? invitation.role}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="secondary" size="sm" onPress={() => copyInvitationLink(invitation.id)}>
+                    {copiedId === invitation.id ? 'Kopieret!' : 'Kopiér link'}
+                  </Button>
+                  <Button
+                    variant="danger-soft"
+                    size="sm"
+                    onPress={() =>
+                      authClient.organization.cancelInvitation({ invitationId: invitation.id }).then(reload)
+                    }
                   >
-                    <option value="" disabled>
-                      Ingen rolle
-                    </option>
-                    {ROLES.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+                    Annullér
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </Card.Content>
+      </Card>
     </div>
   )
 }
