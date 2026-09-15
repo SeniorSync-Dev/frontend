@@ -1,56 +1,47 @@
 import type { ReactNode } from 'react'
 import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router'
-import { Alert, Button, Spinner } from '@heroui/react'
 import { authClient } from '../lib/auth-client'
-import type { CareHome as CareHome } from '../lib/citizen/types'
-import { CitizenProvider } from '../components/citizen'
-import { largeButton } from '../components/citizen/styles'
+import { CitizenProvider, ErrorState, LoadingState } from '../components/citizen'
 
 export const Route = createFileRoute('/citizen')({ component: CitizenLayout })
 
-function devCareHome(): CareHome | undefined {
-  const name = import.meta.env.DEV ? import.meta.env.VITE_DEV_CARE?.trim() : undefined
-  return name ? { id: name, name } : undefined
-}
-
 function CitizenLayout() {
-  const { data: session, isPending, error, refetch } = authClient.useSession()
+  const session = authClient.useSession()
+  const organizations = authClient.useListOrganizations()
 
-  if (isPending) {
+  if (session.isPending || (session.data && organizations.isPending)) {
     return (
       <Frame>
-        <div className="flex flex-1 items-center justify-center py-24">
-          <Spinner size="lg" color="accent" aria-label="Henter dine oplysninger" />
-        </div>
+        <LoadingState />
       </Frame>
     )
   }
 
-  if (error) {
+  if (session.error) {
     return (
       <Frame>
-        <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-6 py-16">
-          <Alert status="danger">
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Title className="text-xl">Vi kunne ikke hente dine oplysninger</Alert.Title>
-              <Alert.Description className="text-lg">Prøv igen om et øjeblik.</Alert.Description>
-            </Alert.Content>
-          </Alert>
-          <Button variant="primary" className={`${largeButton} self-start`} onPress={() => refetch()}>
-            Prøv igen
-          </Button>
-        </div>
+        <ErrorState onRetry={() => session.refetch()} />
       </Frame>
     )
   }
 
-  if (!session) {
+  if (!session.data) {
     return <Navigate to="/auth/signin" search={{ as: 'borger' }} replace />
   }
 
+  if (organizations.error) {
+    return (
+      <Frame>
+        <ErrorState onRetry={() => organizations.refetch()} />
+      </Frame>
+    )
+  }
+
+  const organization = organizations.data?.[0]
+  const careHome = organization ? { id: organization.id, name: organization.name } : undefined
+
   return (
-    <CitizenProvider value={{ user: session.user, careHome: devCareHome() }}>
+    <CitizenProvider value={{ user: session.data.user, careHome }}>
       <Frame>
         <Outlet />
       </Frame>
