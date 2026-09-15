@@ -10,12 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CitizenRouteImport } from './routes/citizen'
 import { Route as AuthProfileRouteImport } from './routes/auth/profile'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
+import { Route as CitizenIndexRouteImport } from './routes/citizen/index'
+import { Route as CitizenActivitiesRouteImport } from './routes/citizen/activities'
+import { Route as CitizenAppointmentsRouteImport } from './routes/citizen/appointments'
+import { Route as CitizenMessagesRouteImport } from './routes/citizen/messages'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CitizenRoute = CitizenRouteImport.update({
+  id: '/citizen',
+  path: '/citizen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthProfileRoute = AuthProfileRouteImport.update({
@@ -28,33 +38,92 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
   path: '/auth/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CitizenIndexRoute = CitizenIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CitizenRoute,
+} as any)
+const CitizenActivitiesRoute = CitizenActivitiesRouteImport.update({
+  id: '/activities',
+  path: '/activities',
+  getParentRoute: () => CitizenRoute,
+} as any)
+const CitizenAppointmentsRoute = CitizenAppointmentsRouteImport.update({
+  id: '/appointments',
+  path: '/appointments',
+  getParentRoute: () => CitizenRoute,
+} as any)
+const CitizenMessagesRoute = CitizenMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => CitizenRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/citizen': typeof CitizenRouteWithChildren
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/citizen/activities': typeof CitizenActivitiesRoute
+  '/citizen/appointments': typeof CitizenAppointmentsRoute
+  '/citizen/messages': typeof CitizenMessagesRoute
+  '/citizen/': typeof CitizenIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/citizen/activities': typeof CitizenActivitiesRoute
+  '/citizen/appointments': typeof CitizenAppointmentsRoute
+  '/citizen/messages': typeof CitizenMessagesRoute
+  '/citizen': typeof CitizenIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/citizen': typeof CitizenRouteWithChildren
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/citizen/activities': typeof CitizenActivitiesRoute
+  '/citizen/appointments': typeof CitizenAppointmentsRoute
+  '/citizen/messages': typeof CitizenMessagesRoute
+  '/citizen/': typeof CitizenIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth/profile' | '/auth/signin'
+  fullPaths:
+    | '/'
+    | '/citizen'
+    | '/auth/profile'
+    | '/auth/signin'
+    | '/citizen/activities'
+    | '/citizen/appointments'
+    | '/citizen/messages'
+    | '/citizen/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/profile' | '/auth/signin'
-  id: '__root__' | '/' | '/auth/profile' | '/auth/signin'
+  to:
+    | '/'
+    | '/auth/profile'
+    | '/auth/signin'
+    | '/citizen/activities'
+    | '/citizen/appointments'
+    | '/citizen/messages'
+    | '/citizen'
+  id:
+    | '__root__'
+    | '/'
+    | '/citizen'
+    | '/auth/profile'
+    | '/auth/signin'
+    | '/citizen/activities'
+    | '/citizen/appointments'
+    | '/citizen/messages'
+    | '/citizen/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CitizenRoute: typeof CitizenRouteWithChildren
   AuthProfileRoute: typeof AuthProfileRoute
   AuthSigninRoute: typeof AuthSigninRoute
 }
@@ -66,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/citizen': {
+      id: '/citizen'
+      path: '/citizen'
+      fullPath: '/citizen'
+      preLoaderRoute: typeof CitizenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/profile': {
@@ -82,11 +158,57 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/citizen/': {
+      id: '/citizen/'
+      path: '/'
+      fullPath: '/citizen/'
+      preLoaderRoute: typeof CitizenIndexRouteImport
+      parentRoute: typeof CitizenRoute
+    }
+    '/citizen/activities': {
+      id: '/citizen/activities'
+      path: '/activities'
+      fullPath: '/citizen/activities'
+      preLoaderRoute: typeof CitizenActivitiesRouteImport
+      parentRoute: typeof CitizenRoute
+    }
+    '/citizen/appointments': {
+      id: '/citizen/appointments'
+      path: '/appointments'
+      fullPath: '/citizen/appointments'
+      preLoaderRoute: typeof CitizenAppointmentsRouteImport
+      parentRoute: typeof CitizenRoute
+    }
+    '/citizen/messages': {
+      id: '/citizen/messages'
+      path: '/messages'
+      fullPath: '/citizen/messages'
+      preLoaderRoute: typeof CitizenMessagesRouteImport
+      parentRoute: typeof CitizenRoute
+    }
   }
 }
 
+interface CitizenRouteChildren {
+  CitizenActivitiesRoute: typeof CitizenActivitiesRoute
+  CitizenAppointmentsRoute: typeof CitizenAppointmentsRoute
+  CitizenMessagesRoute: typeof CitizenMessagesRoute
+  CitizenIndexRoute: typeof CitizenIndexRoute
+}
+
+const CitizenRouteChildren: CitizenRouteChildren = {
+  CitizenActivitiesRoute: CitizenActivitiesRoute,
+  CitizenAppointmentsRoute: CitizenAppointmentsRoute,
+  CitizenMessagesRoute: CitizenMessagesRoute,
+  CitizenIndexRoute: CitizenIndexRoute,
+}
+
+const CitizenRouteWithChildren =
+  CitizenRoute._addFileChildren(CitizenRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CitizenRoute: CitizenRouteWithChildren,
   AuthProfileRoute: AuthProfileRoute,
   AuthSigninRoute: AuthSigninRoute,
 }
