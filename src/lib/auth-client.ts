@@ -1,23 +1,30 @@
-import { createAuthClient } from "better-auth/react"
+import { createAuthClient } from "better-auth/react";
 import {
-    adminClient,
+    organizationClient,
     inferAdditionalFields,
 } from "better-auth/client/plugins";
-import { ac, admin, relative, citizen, employee } from "./accessController";
+import {
+    ac,
+    citizen,
+    relative,
+    employee,
+    systemAdmin,
+} from "./accessController";
+
+export const API_BASE_URL = "http://localhost:3000";
 
 export const authClient = createAuthClient({
     /** The base URL of the server (optional if you're using the same domain) */
-    baseURL: "http://localhost:3000",
+    baseURL: API_BASE_URL,
 
     plugins: [
-        adminClient({
+        organizationClient({
             ac,
-            adminRole: admin,
             roles: {
-                relative: relative,
-                citizen: citizen,
-                employee: employee,
-                admin: admin,
+                citizen,
+                relative,
+                employee,
+                systemAdmin,
             },
         }),
 
@@ -37,5 +44,5 @@ export const authClient = createAuthClient({
                 },
             },
         }),
-    ]
-})
+    ],
+});
