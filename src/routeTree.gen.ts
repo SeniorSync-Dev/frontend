@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminKioskPageRouteImport } from './routes/admin/kioskPage'
 import { Route as AdminSigninRouteImport } from './routes/admin/signin'
@@ -22,20 +23,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminDashboardRoute = AdminDashboardRouteImport.update({
-  id: '/admin/dashboard',
-  path: '/admin/dashboard',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminKioskPageRoute = AdminKioskPageRouteImport.update({
-  id: '/admin/kioskPage',
-  path: '/admin/kioskPage',
-  getParentRoute: () => rootRouteImport,
+  id: '/kioskPage',
+  path: '/kioskPage',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminSigninRoute = AdminSigninRouteImport.update({
-  id: '/admin/signin',
-  path: '/admin/signin',
-  getParentRoute: () => rootRouteImport,
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthProfileRoute = AuthProfileRouteImport.update({
   id: '/auth/profile',
@@ -56,6 +62,7 @@ const AuthAcceptInvitationInvitationIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/signin': typeof AdminSigninRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/signin': typeof AdminSigninRoute
@@ -75,6 +83,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/signin': typeof AdminSigninRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/admin/dashboard'
     | '/admin/kioskPage'
     | '/admin/signin'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/admin/dashboard'
     | '/admin/kioskPage'
     | '/admin/signin'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/admin/dashboard'
     | '/admin/kioskPage'
     | '/admin/signin'
@@ -114,9 +126,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminDashboardRoute: typeof AdminDashboardRoute
-  AdminKioskPageRoute: typeof AdminKioskPageRoute
-  AdminSigninRoute: typeof AdminSigninRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthProfileRoute: typeof AuthProfileRoute
   AuthSigninRoute: typeof AuthSigninRoute
   AuthAcceptInvitationInvitationIdRoute: typeof AuthAcceptInvitationInvitationIdRoute
@@ -131,26 +141,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
-      path: '/admin/dashboard'
+      path: '/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/kioskPage': {
       id: '/admin/kioskPage'
-      path: '/admin/kioskPage'
+      path: '/kioskPage'
       fullPath: '/admin/kioskPage'
       preLoaderRoute: typeof AdminKioskPageRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/signin': {
       id: '/admin/signin'
-      path: '/admin/signin'
+      path: '/signin'
       fullPath: '/admin/signin'
       preLoaderRoute: typeof AdminSigninRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/auth/profile': {
       id: '/auth/profile'
@@ -176,11 +193,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+interface AdminRouteChildren {
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminKioskPageRoute: typeof AdminKioskPageRoute
+  AdminSigninRoute: typeof AdminSigninRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminKioskPageRoute: AdminKioskPageRoute,
   AdminSigninRoute: AdminSigninRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthProfileRoute: AuthProfileRoute,
   AuthSigninRoute: AuthSigninRoute,
   AuthAcceptInvitationInvitationIdRoute: AuthAcceptInvitationInvitationIdRoute,

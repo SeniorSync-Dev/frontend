@@ -46,7 +46,7 @@ function KioskPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background px-5 py-6 text-foreground sm:px-8 sm:py-8 lg:px-12">
+    <main className="min-h-full bg-background px-5 py-6 text-foreground sm:px-8 sm:py-8 lg:px-12">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
