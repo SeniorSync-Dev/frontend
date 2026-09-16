@@ -1,5 +1,3 @@
-/** Danish date and text formatting for the citizen area. Everything goes through Intl. */
-
 const LOCALE = 'da-DK'
 const MS_PER_DAY = 86_400_000
 
