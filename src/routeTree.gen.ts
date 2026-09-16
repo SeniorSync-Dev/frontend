@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
+import { Route as AdminKioskPageRouteImport } from './routes/admin/kioskPage'
 import { Route as AdminSigninRouteImport } from './routes/admin/signin'
 import { Route as AuthProfileRouteImport } from './routes/auth/profile'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminKioskPageRoute = AdminKioskPageRouteImport.update({
+  id: '/admin/kioskPage',
+  path: '/admin/kioskPage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSigninRoute = AdminSigninRouteImport.update({
@@ -51,6 +57,7 @@ const AuthAcceptInvitationInvitationIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin/dashboard'
+    | '/admin/kioskPage'
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/dashboard'
+    | '/admin/kioskPage'
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin/dashboard'
+    | '/admin/kioskPage'
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
@@ -103,6 +115,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminKioskPageRoute: typeof AdminKioskPageRoute
   AdminSigninRoute: typeof AdminSigninRoute
   AuthProfileRoute: typeof AuthProfileRoute
   AuthSigninRoute: typeof AuthSigninRoute
@@ -123,6 +136,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/kioskPage': {
+      id: '/admin/kioskPage'
+      path: '/admin/kioskPage'
+      fullPath: '/admin/kioskPage'
+      preLoaderRoute: typeof AdminKioskPageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/signin': {
@@ -159,6 +179,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminKioskPageRoute: AdminKioskPageRoute,
   AdminSigninRoute: AdminSigninRoute,
   AuthProfileRoute: AuthProfileRoute,
   AuthSigninRoute: AuthSigninRoute,
