@@ -1,9 +1,24 @@
 import { Avatar, Spinner } from '@heroui/react'
-import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
+import { Link, Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { authClient } from '../lib/auth-client'
 import { getInitials } from '../lib/initials'
 
 export const Route = createFileRoute('/admin')({
+  beforeLoad: async ({ location }) => {
+    // The sign-in screen must remain public so an unauthenticated visitor can sign in.
+    if (location.pathname === '/admin/signin') return
+
+    const { data: session } = await authClient.getSession()
+    if (!session) {
+      throw redirect({ to: '/admin/signin' })
+    }
+
+    const { data, error } = await authClient.organization.getActiveMemberRole();
+
+    if (!data || (data.role !== 'systemAdmin' && data.role !== 'employee')) {
+      throw redirect({ to: '/' })
+    }
+  },
   component: AdminLayout,
 })
 
@@ -51,7 +66,11 @@ function AdminLayout() {
               <span className="text-sm text-muted">Henter bruger...</span>
             </div>
           ) : session ? (
-            <Link to="/auth/profile" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-accent/10">
+            <Link
+              to="/auth/profile"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-accent/10"
+              aria-label={'G\u00e5 til min profil'}
+            >
               <Avatar size="sm" color="accent">
                 <Avatar.Fallback>{getInitials(session.user.name)}</Avatar.Fallback>
               </Avatar>
