@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CitizenRouteImport } from './routes/citizen'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
+import { Route as AdminKioskPageRouteImport } from './routes/admin/kioskPage'
 import { Route as AdminSigninRouteImport } from './routes/admin/signin'
 import { Route as AuthProfileRouteImport } from './routes/auth/profile'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
@@ -26,20 +28,30 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CitizenRoute = CitizenRouteImport.update({
   id: '/citizen',
   path: '/citizen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
-  id: '/admin/dashboard',
-  path: '/admin/dashboard',
-  getParentRoute: () => rootRouteImport,
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminKioskPageRoute = AdminKioskPageRouteImport.update({
+  id: '/kioskPage',
+  path: '/kioskPage',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminSigninRoute = AdminSigninRouteImport.update({
-  id: '/admin/signin',
-  path: '/admin/signin',
-  getParentRoute: () => rootRouteImport,
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthProfileRoute = AuthProfileRouteImport.update({
   id: '/auth/profile',
@@ -80,8 +92,10 @@ const AuthAcceptInvitationInvitationIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/citizen': typeof CitizenRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
@@ -93,7 +107,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
@@ -106,8 +122,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/citizen': typeof CitizenRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
@@ -121,8 +139,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/citizen'
     | '/admin/dashboard'
+    | '/admin/kioskPage'
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
@@ -134,7 +154,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/admin/dashboard'
+    | '/admin/kioskPage'
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
@@ -146,8 +168,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/citizen'
     | '/admin/dashboard'
+    | '/admin/kioskPage'
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
@@ -160,9 +184,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CitizenRoute: typeof CitizenRouteWithChildren
-  AdminDashboardRoute: typeof AdminDashboardRoute
-  AdminSigninRoute: typeof AdminSigninRoute
   AuthProfileRoute: typeof AuthProfileRoute
   AuthSigninRoute: typeof AuthSigninRoute
   AuthAcceptInvitationInvitationIdRoute: typeof AuthAcceptInvitationInvitationIdRoute
@@ -177,6 +200,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/citizen': {
       id: '/citizen'
       path: '/citizen'
@@ -186,17 +216,24 @@ declare module '@tanstack/react-router' {
     }
     '/admin/dashboard': {
       id: '/admin/dashboard'
-      path: '/admin/dashboard'
+      path: '/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/kioskPage': {
+      id: '/admin/kioskPage'
+      path: '/kioskPage'
+      fullPath: '/admin/kioskPage'
+      preLoaderRoute: typeof AdminKioskPageRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/signin': {
       id: '/admin/signin'
-      path: '/admin/signin'
+      path: '/signin'
       fullPath: '/admin/signin'
       preLoaderRoute: typeof AdminSigninRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/auth/profile': {
       id: '/auth/profile'
@@ -250,6 +287,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminKioskPageRoute: typeof AdminKioskPageRoute
+  AdminSigninRoute: typeof AdminSigninRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminKioskPageRoute: AdminKioskPageRoute,
+  AdminSigninRoute: AdminSigninRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface CitizenRouteChildren {
   CitizenActivitiesRoute: typeof CitizenActivitiesRoute
   CitizenAppointmentsRoute: typeof CitizenAppointmentsRoute
@@ -269,9 +320,8 @@ const CitizenRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   CitizenRoute: CitizenRouteWithChildren,
-  AdminDashboardRoute: AdminDashboardRoute,
-  AdminSigninRoute: AdminSigninRoute,
   AuthProfileRoute: AuthProfileRoute,
   AuthSigninRoute: AuthSigninRoute,
   AuthAcceptInvitationInvitationIdRoute: AuthAcceptInvitationInvitationIdRoute,
