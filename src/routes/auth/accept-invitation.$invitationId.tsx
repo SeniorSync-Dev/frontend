@@ -65,6 +65,8 @@ function AcceptInvitation() {
       setStatus('signed-out')
       return
     }
+    if (status !== 'loading' && status !== 'signed-out') 
+      return
 
     authClient.organization.getInvitation({ query: { id: invitationId } }).then(({ data, error: getError }) => {
       if (getError || !data) {
@@ -75,7 +77,7 @@ function AcceptInvitation() {
       setInvitation(data)
       setStatus('ready')
     })
-  }, [invitationId, isSessionPending, session])
+  }, [invitationId, isSessionPending, session, status])
 
   function signInWithMitId() {
     const invitationUrl = `${window.location.origin}/auth/accept-invitation/${invitationId}`
@@ -105,13 +107,14 @@ function AcceptInvitation() {
     setIsSubmitting(true)
     setError(null)
     const { error: acceptError } = await authClient.organization.acceptInvitation({ invitationId })
-    setIsSubmitting(false)
     if (acceptError) {
+      setIsSubmitting(false)
       setError(acceptError.message ?? 'Kunne ikke acceptere invitationen.')
       setStatus('error')
       return
     }
     setStatus('accepted')
+    navigate({ to: destinationForRole(invitation?.role ?? ''), replace: true })
   }
 
   async function rejectInvitation() {
