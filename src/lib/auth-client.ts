@@ -8,6 +8,7 @@ import {
     citizen,
     relative,
     employee,
+    servicePartner,
     systemAdmin,
 } from "./accessController";
 
@@ -24,6 +25,7 @@ export const authClient = createAuthClient({
                 citizen,
                 relative,
                 employee,
+                servicePartner,
                 systemAdmin,
             },
         }),

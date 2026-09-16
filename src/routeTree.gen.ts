@@ -17,6 +17,7 @@ import { Route as AdminKioskPageRouteImport } from './routes/admin/kioskPage'
 import { Route as AdminSigninRouteImport } from './routes/admin/signin'
 import { Route as AuthProfileRouteImport } from './routes/auth/profile'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
+import { Route as ServicePartnerSigninRouteImport } from './routes/servicePartner/signin'
 import { Route as AuthAcceptInvitationInvitationIdRouteImport } from './routes/auth/accept-invitation.$invitationId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
   path: '/auth/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicePartnerSigninRoute = ServicePartnerSigninRouteImport.update({
+  id: '/servicePartner/signin',
+  path: '/servicePartner/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthAcceptInvitationInvitationIdRoute =
   AuthAcceptInvitationInvitationIdRouteImport.update({
     id: '/auth/accept-invitation/$invitationId',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/servicePartner/signin': typeof ServicePartnerSigninRoute
   '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
 export interface FileRoutesByTo {
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/servicePartner/signin': typeof ServicePartnerSigninRoute
   '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
 export interface FileRoutesById {
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/admin/signin': typeof AdminSigninRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/servicePartner/signin': typeof ServicePartnerSigninRoute
   '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
 export interface FileRouteTypes {
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
+    | '/servicePartner/signin'
     | '/auth/accept-invitation/$invitationId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
+    | '/servicePartner/signin'
     | '/auth/accept-invitation/$invitationId'
   id:
     | '__root__'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/admin/signin'
     | '/auth/profile'
     | '/auth/signin'
+    | '/servicePartner/signin'
     | '/auth/accept-invitation/$invitationId'
   fileRoutesById: FileRoutesById
 }
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AuthProfileRoute: typeof AuthProfileRoute
   AuthSigninRoute: typeof AuthSigninRoute
+  ServicePartnerSigninRoute: typeof ServicePartnerSigninRoute
   AuthAcceptInvitationInvitationIdRoute: typeof AuthAcceptInvitationInvitationIdRoute
 }
 
@@ -202,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/servicePartner/signin': {
+      id: '/servicePartner/signin'
+      path: '/servicePartner/signin'
+      fullPath: '/servicePartner/signin'
+      preLoaderRoute: typeof ServicePartnerSigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/accept-invitation/$invitationId': {
       id: '/auth/accept-invitation/$invitationId'
       path: '/auth/accept-invitation/$invitationId'
@@ -233,6 +253,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AuthProfileRoute: AuthProfileRoute,
   AuthSigninRoute: AuthSigninRoute,
+  ServicePartnerSigninRoute: ServicePartnerSigninRoute,
   AuthAcceptInvitationInvitationIdRoute: AuthAcceptInvitationInvitationIdRoute,
 }
 export const routeTree = rootRouteImport
