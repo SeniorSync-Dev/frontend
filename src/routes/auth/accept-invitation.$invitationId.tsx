@@ -25,7 +25,6 @@ type Invitation = {
 
 type Status = 'loading' | 'signed-out' | 'ready' | 'accepted' | 'rejected' | 'error'
 
-// Where a new member continues after accepting, based on the role they were invited with.
 function destinationForRole(role: string) {
   switch (role) {
     case 'citizen':
