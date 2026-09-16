@@ -37,10 +37,10 @@ type Invitation = { id: string; email: string; role: string; status: string }
 
 function RouteComponent() {
   const navigate = useNavigate()
-  const { data: session, isPending: isSessionPending } = authClient.useSession()
+  const { data: session, isPending: isSessionPending, refetch: refetchSession } = authClient.useSession()
   const { data: organizations, refetch: refetchOrganizations } = authClient.useListOrganizations()
-  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
-  const organization = organizations?.find((org) => org.id === selectedOrgId) ?? organizations?.[0]
+  const organization =
+    organizations?.find((org) => org.id === session?.session.activeOrganizationId) ?? organizations?.[0]
 
   const [members, setMembers] = useState<Array<Member>>([])
   const [invitations, setInvitations] = useState<Array<Invitation>>([])
@@ -154,9 +154,15 @@ function RouteComponent() {
             aria-label="Organisation"
             className="rounded-md border border-border bg-background px-3 py-2 text-sm"
             value={organization.id}
-            onChange={(e) => {
-              setSelectedOrgId(e.target.value)
-              authClient.organization.setActive({ organizationId: e.target.value })
+            onChange={async (e) => {
+              const selectedOrg = organizations.find((org) => org.id === e.target.value)
+              if (!selectedOrg) return
+
+              await authClient.organization.setActive({
+                organizationId: selectedOrg.id,
+                organizationSlug: selectedOrg.slug,
+              })
+              await refetchSession()
             }}
           >
             {organizations.map((org) => (
