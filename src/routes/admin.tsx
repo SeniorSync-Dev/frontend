@@ -1,5 +1,5 @@
 import { Avatar, Spinner } from '@heroui/react'
-import { Link, Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import { Link, Outlet, createFileRoute, redirect, useLocation } from '@tanstack/react-router'
 import { authClient } from '../lib/auth-client'
 import { getInitials } from '../lib/initials'
 
@@ -27,7 +27,12 @@ const navClassName =
 const activeNavClassName = `${navClassName} bg-accent text-accent-foreground`
 
 function AdminLayout() {
+  const location = useLocation()
   const { data: session, isPending } = authClient.useSession()
+
+  if (location.pathname === '/admin/signin') {
+    return <Outlet />
+  }
 
   return (
     <div className="flex min-h-full flex-1 bg-background">
