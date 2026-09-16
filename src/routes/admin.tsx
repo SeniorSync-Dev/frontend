@@ -13,9 +13,10 @@ export const Route = createFileRoute('/admin')({
       throw redirect({ to: '/admin/signin' })
     }
 
-    const { data, error } = await authClient.organization.getActiveMemberRole();
+    const { data } = await authClient.organization.getActiveMemberRole();
+    const userRole = data?.role;
 
-    if (!data || (data.role !== 'systemAdmin' && data.role !== 'employee')) {
+    if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee')) {
       throw redirect({ to: '/' })
     }
   },
@@ -29,6 +30,9 @@ const activeNavClassName = `${navClassName} bg-accent text-accent-foreground`
 function AdminLayout() {
   const location = useLocation()
   const { data: session, isPending } = authClient.useSession()
+  const { data: activeMemberRole } = authClient.useActiveMemberRole()
+  const canViewAdminNavigation =
+    activeMemberRole?.role === 'systemAdmin' || activeMemberRole?.role === 'employee'
 
   if (location.pathname === '/admin/signin') {
     return <Outlet />
@@ -47,22 +51,24 @@ function AdminLayout() {
           </span>
         </Link>
 
-        <nav aria-label="Administration" className="flex flex-col gap-1">
-          <p className="px-3 pb-2 text-xs font-semibold tracking-wider text-muted uppercase">Oversigt</p>
-          <Link
-            to="/admin/dashboard"
-            className={navClassName}
-            activeProps={{ className: activeNavClassName }}
-            activeOptions={{ exact: true }}
-          >
-            <DashboardIcon />
-            Organisation
-          </Link>
-          <Link to="/admin/kioskPage" className={navClassName} activeProps={{ className: activeNavClassName }}>
-            <AlarmIcon />
-            Alarmoversigt
-          </Link>
-        </nav>
+        {canViewAdminNavigation && (
+          <nav aria-label="Administration" className="flex flex-col gap-1">
+            <p className="px-3 pb-2 text-xs font-semibold tracking-wider text-muted uppercase">Oversigt</p>
+            <Link
+              to="/admin/dashboard"
+              className={navClassName}
+              activeProps={{ className: activeNavClassName }}
+              activeOptions={{ exact: true }}
+            >
+              <DashboardIcon />
+              Organisation
+            </Link>
+            <Link to="/admin/kioskPage" className={navClassName} activeProps={{ className: activeNavClassName }}>
+              <AlarmIcon />
+              Alarmoversigt
+            </Link>
+          </nav>
+        )}
 
         <div className="mt-auto border-t border-border pt-4">
           {isPending ? (
