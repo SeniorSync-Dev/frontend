@@ -1,19 +1,7 @@
-import type { Activity, Appointment, AppointmentType } from './types'
+import type { Appointment, AppointmentType } from "#/models/appointment"
 
-export function upcomingAppointments(appointments: Appointment[], now = new Date()) {
-  return appointments
-    .filter((appointment) => (appointment.end ?? appointment.start).getTime() >= now.getTime())
-    .sort((a, b) => a.start.getTime() - b.start.getTime())
-}
-
-export function nextAppointment(appointments: Appointment[], now = new Date()) {
-  return upcomingAppointments(appointments, now)[0] ?? null
-}
-
-export function upcomingActivities(activities: Activity[], now = new Date()) {
-  return activities
-    .filter((activity) => (activity.end ?? activity.start).getTime() >= now.getTime())
-    .sort((a, b) => a.start.getTime() - b.start.getTime())
+export function nextAppointment(appointments: Appointment[]) {
+  return appointments[0] ?? null
 }
 
 export const appointmentTypeLabel: Record<AppointmentType, string> = {

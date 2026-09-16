@@ -20,7 +20,6 @@ import { Route as AuthSigninRouteImport } from './routes/auth/signin'
 import { Route as CitizenIndexRouteImport } from './routes/citizen/index'
 import { Route as CitizenActivitiesRouteImport } from './routes/citizen/activities'
 import { Route as CitizenAppointmentsRouteImport } from './routes/citizen/appointments'
-import { Route as CitizenMessagesRouteImport } from './routes/citizen/messages'
 import { Route as AuthAcceptInvitationInvitationIdRouteImport } from './routes/auth/accept-invitation.$invitationId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -78,11 +77,6 @@ const CitizenAppointmentsRoute = CitizenAppointmentsRouteImport.update({
   path: '/appointments',
   getParentRoute: () => CitizenRoute,
 } as any)
-const CitizenMessagesRoute = CitizenMessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
-  getParentRoute: () => CitizenRoute,
-} as any)
 const AuthAcceptInvitationInvitationIdRoute =
   AuthAcceptInvitationInvitationIdRouteImport.update({
     id: '/auth/accept-invitation/$invitationId',
@@ -101,7 +95,6 @@ export interface FileRoutesByFullPath {
   '/auth/signin': typeof AuthSigninRoute
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
-  '/citizen/messages': typeof CitizenMessagesRoute
   '/citizen/': typeof CitizenIndexRoute
   '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
@@ -115,7 +108,6 @@ export interface FileRoutesByTo {
   '/auth/signin': typeof AuthSigninRoute
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
-  '/citizen/messages': typeof CitizenMessagesRoute
   '/citizen': typeof CitizenIndexRoute
   '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
@@ -131,7 +123,6 @@ export interface FileRoutesById {
   '/auth/signin': typeof AuthSigninRoute
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
-  '/citizen/messages': typeof CitizenMessagesRoute
   '/citizen/': typeof CitizenIndexRoute
   '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
@@ -148,7 +139,6 @@ export interface FileRouteTypes {
     | '/auth/signin'
     | '/citizen/activities'
     | '/citizen/appointments'
-    | '/citizen/messages'
     | '/citizen/'
     | '/auth/accept-invitation/$invitationId'
   fileRoutesByTo: FileRoutesByTo
@@ -162,7 +152,6 @@ export interface FileRouteTypes {
     | '/auth/signin'
     | '/citizen/activities'
     | '/citizen/appointments'
-    | '/citizen/messages'
     | '/citizen'
     | '/auth/accept-invitation/$invitationId'
   id:
@@ -177,7 +166,6 @@ export interface FileRouteTypes {
     | '/auth/signin'
     | '/citizen/activities'
     | '/citizen/appointments'
-    | '/citizen/messages'
     | '/citizen/'
     | '/auth/accept-invitation/$invitationId'
   fileRoutesById: FileRoutesById
@@ -270,13 +258,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CitizenAppointmentsRouteImport
       parentRoute: typeof CitizenRoute
     }
-    '/citizen/messages': {
-      id: '/citizen/messages'
-      path: '/messages'
-      fullPath: '/citizen/messages'
-      preLoaderRoute: typeof CitizenMessagesRouteImport
-      parentRoute: typeof CitizenRoute
-    }
     '/auth/accept-invitation/$invitationId': {
       id: '/auth/accept-invitation/$invitationId'
       path: '/auth/accept-invitation/$invitationId'
@@ -304,14 +285,12 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface CitizenRouteChildren {
   CitizenActivitiesRoute: typeof CitizenActivitiesRoute
   CitizenAppointmentsRoute: typeof CitizenAppointmentsRoute
-  CitizenMessagesRoute: typeof CitizenMessagesRoute
   CitizenIndexRoute: typeof CitizenIndexRoute
 }
 
 const CitizenRouteChildren: CitizenRouteChildren = {
   CitizenActivitiesRoute: CitizenActivitiesRoute,
   CitizenAppointmentsRoute: CitizenAppointmentsRoute,
-  CitizenMessagesRoute: CitizenMessagesRoute,
   CitizenIndexRoute: CitizenIndexRoute,
 }
 

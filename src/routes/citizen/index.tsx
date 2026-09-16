@@ -1,24 +1,12 @@
-import { useEffect, useState } from 'react'
 import { createFileRoute, Link, useNavigate, type LinkProps } from '@tanstack/react-router'
 import { Alert, Button, Card, Spinner } from '@heroui/react'
-import {
-  CalendarDays,
-  Check,
-  ChevronRight,
-  Clock,
-  MapPin,
-  MessageSquare,
-  Phone,
-  Users,
-  Video,
-  type LucideIcon,
-} from 'lucide-react'
+import { CalendarDays, Check, ChevronRight, Clock, MapPin, Phone, Users, Video, type LucideIcon } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
-import { fetchAppointments } from '../../lib/citizen/api'
+import { useAppointments } from '../../lib/citizen/api'
 import { nextAppointment, nextAppointmentHeading } from '../../lib/citizen/appointments'
 import { firstName, formatLongDate, formatRelativeDay, formatTime, greeting } from '../../lib/citizen/format'
-import { cardClass, xlButton } from '../../lib/citizen/styles'
-import type { Appointment, AppointmentType } from '../../lib/citizen/types'
+import { xlButton } from '../../lib/citizen/styles'
+import type { AppointmentType, Appointment } from '#/models/appointment'
 
 export const Route = createFileRoute('/citizen/')({
   component: CitizenHome,
@@ -29,22 +17,7 @@ function CitizenHome() {
   const { data: organizations, isPending: isOrganizationsPending } = authClient.useListOrganizations()
   const careHome = organizations?.[0]
 
-  const [appointments, setAppointments] = useState<Array<Appointment> | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  async function reload() {
-    try {
-      setAppointments(await fetchAppointments())
-      setError(null)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Kunne ikke hente dine aftaler.')
-    }
-  }
-
-  useEffect(() => {
-    if (careHome) reload()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [careHome?.id])
+  const { data: appointments, error } = useAppointments()
 
   if (!session) return null
 
@@ -71,7 +44,7 @@ function CitizenHome() {
   }
 
   const now = new Date()
-  const next = appointments && nextAppointment(appointments, now)
+  const next = appointments && nextAppointment(appointments)
 
   return (
     <>
@@ -88,12 +61,12 @@ function CitizenHome() {
           <Alert.Indicator />
           <Alert.Content>
             <Alert.Title className="text-xl">Vi kunne ikke hente dine aftaler</Alert.Title>
-            <Alert.Description className="text-lg">{error}</Alert.Description>
+            <Alert.Description className="text-lg">{error.message}</Alert.Description>
           </Alert.Content>
         </Alert>
       )}
 
-      <Card className={`${cardClass} gap-5 p-6 sm:p-7`}>
+      <Card className="gap-5 p-6 sm:p-7">
         <Card.Header className="flex-row items-center gap-3">
           <CalendarDays className="size-6 text-accent" aria-hidden />
           <Card.Title className="text-xl font-bold text-accent">Dit næste besøg</Card.Title>
@@ -112,16 +85,12 @@ function CitizenHome() {
         </Card.Footer>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <NavigationCard
-          to="/citizen/activities"
-          icon={Users}
-          title="Aktiviteter"
-          description="Se og tilmeld dig aktiviteter"
-          color="brand"
-        />
-        <NavigationCard to="/citizen/messages" icon={MessageSquare} title="Beskeder" description="Ingen nye beskeder" />
-      </div>
+      <NavigationCard
+        to="/citizen/activities"
+        icon={Users}
+        title="Aktiviteter"
+        description="Se og tilmeld dig aktiviteter"
+      />
     </>
   )
 }
@@ -172,22 +141,18 @@ function NavigationCard({
   icon: Icon,
   title,
   description,
-  color = 'accent',
 }: {
   to: LinkProps['to']
   icon: LucideIcon
   title: string
   description: string
-  color?: 'accent' | 'brand'
 }) {
-  const iconClass = color === 'brand' ? 'bg-(--brand-soft) text-(--brand)' : 'bg-accent-soft text-accent'
-
   return (
     <Link
       to={to}
-      className={`${cardClass} flex items-center gap-5 no-underline transition-colors hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus`}
+      className="flex items-center gap-5 rounded-2xl border border-border bg-surface p-6 no-underline transition-colors hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
     >
-      <span className={`flex size-15 flex-none items-center justify-center rounded-xl ${iconClass}`}>
+      <span className="flex size-15 flex-none items-center justify-center rounded-xl bg-(--brand-soft) text-(--brand)">
         <Icon className="size-7" aria-hidden />
       </span>
       <span className="min-w-0 flex-1">
@@ -230,7 +195,7 @@ function WaitingForCareHome({ firstName: first }: { firstName: string }) {
         <p className="mt-1 text-2xl text-muted">Du er logget ind. Vi er ved at gøre alt klar til dig.</p>
       </div>
 
-      <Card className={`${cardClass} flex-col items-start gap-4 p-5 sm:flex-row sm:items-center sm:gap-6 sm:px-6`}>
+      <Card className="flex-col items-start gap-4 p-5 sm:flex-row sm:items-center sm:gap-6 sm:px-6">
         <span className="flex size-21 flex-none items-center justify-center rounded-full bg-accent-soft text-accent">
           <Clock className="size-10" aria-hidden />
         </span>
@@ -245,7 +210,7 @@ function WaitingForCareHome({ firstName: first }: { firstName: string }) {
       <ol className="grid gap-4 md:grid-cols-3">
         {steps.map((step) => (
           <li key={step.number} aria-current={step.status === 'active' ? 'step' : undefined}>
-            <Card className={`${cardClass} h-full gap-2 p-5 ${step.status === 'active' ? 'border-2 border-accent' : ''}`}>
+            <Card className={`h-full gap-2 p-5 ${step.status === 'active' ? 'border-2 border-accent' : ''}`}>
               <Card.Header className="flex-row items-center gap-3">
                 <StepMarker number={step.number} status={step.status} />
                 <Card.Title className="text-xl font-bold">{step.title}</Card.Title>

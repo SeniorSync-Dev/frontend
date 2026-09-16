@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { createFileRoute, Navigate, useNavigate } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, EmptyState, Spinner } from '@heroui/react'
 import { Check, Users } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
-import { cancelActivitySignup, fetchActivities, signUpForActivity } from '../../lib/citizen/api'
-import { upcomingActivities } from '../../lib/citizen/appointments'
+import { useActivities, useCancelActivitySignup, useSignUpForActivity } from '../../lib/citizen/api'
 import { formatDayNumber, formatLongDate, formatShortWeekday, formatTime, formatTimeRange } from '../../lib/citizen/format'
-import { cardClass, largeButton, xlButton } from '../../lib/citizen/styles'
-import type { Activity } from '../../lib/citizen/types'
+import { largeButton, xlButton } from '../../lib/citizen/styles'
+import type { Activity } from '#/models/activity'
 
 export const Route = createFileRoute('/citizen/activities')({
   component: Activities,
@@ -18,50 +17,15 @@ function Activities() {
   const { data: organizations, isPending: isOrganizationsPending } = authClient.useListOrganizations()
   const careHome = organizations?.[0]
 
-  const [activities, setActivities] = useState<Array<Activity> | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [busyId, setBusyId] = useState<string | null>(null)
+  const { data: activities, error, refetch } = useActivities()
+  const signUpMutation = useSignUpForActivity()
+  const cancelMutation = useCancelActivitySignup()
+
   const [confirmed, setConfirmed] = useState<Activity | null>(null)
 
-  async function reload() {
-    try {
-      setActivities(await fetchActivities())
-      setError(null)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Kunne ikke hente aktiviteterne.')
-    }
-  }
-
-  useEffect(() => {
-    if (careHome) reload()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [careHome?.id])
-
   async function signUp(activity: Activity) {
-    setBusyId(activity.id)
-    setError(null)
-    try {
-      await signUpForActivity(activity.id)
-      setConfirmed(activity)
-      await reload()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Tilmeldingen mislykkedes. Prøv venligst igen.')
-    } finally {
-      setBusyId(null)
-    }
-  }
-
-  async function cancel(activity: Activity) {
-    setBusyId(activity.id)
-    setError(null)
-    try {
-      await cancelActivitySignup(activity.id)
-      await reload()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Afmeldingen mislykkedes. Prøv venligst igen.')
-    } finally {
-      setBusyId(null)
-    }
+    await signUpMutation.mutateAsync(activity.id)
+    setConfirmed(activity)
   }
 
   if (isOrganizationsPending || (careHome && !activities && !error)) {
@@ -111,21 +75,21 @@ function Activities() {
           <Alert.Indicator />
           <Alert.Content>
             <Alert.Title className="text-xl">Vi kunne ikke hente aktiviteterne</Alert.Title>
-            <Alert.Description className="text-lg">{error}</Alert.Description>
+            <Alert.Description className="text-lg">{error.message}</Alert.Description>
           </Alert.Content>
         </Alert>
-        <Button variant="primary" className={`${largeButton} self-start`} onPress={reload}>
+        <Button variant="primary" className={`${largeButton} self-start`} onPress={() => refetch()}>
           Prøv igen
         </Button>
       </div>
     )
   }
 
-  const upcoming = upcomingActivities(activities ?? [])
+  const upcoming = activities ?? []
 
   if (upcoming.length === 0) {
     return (
-      <EmptyState className={`${cardClass} flex flex-col items-center gap-4 px-8 py-12 text-center`}>
+      <EmptyState className="flex flex-col items-center gap-4 px-8 py-12 text-center">
         <span className="flex size-21 items-center justify-center rounded-full bg-accent-soft text-accent">
           <Users className="size-10" aria-hidden />
         </span>
@@ -137,14 +101,16 @@ function Activities() {
     )
   }
 
+  const mutationError = signUpMutation.error ?? cancelMutation.error
+
   return (
     <>
-      {error && (
+      {mutationError && (
         <Alert status="danger">
           <Alert.Indicator />
           <Alert.Content>
             <Alert.Title className="text-xl">Det lykkedes ikke</Alert.Title>
-            <Alert.Description className="text-lg">{error}</Alert.Description>
+            <Alert.Description className="text-lg">{mutationError.message}</Alert.Description>
           </Alert.Content>
         </Alert>
       )}
@@ -155,9 +121,12 @@ function Activities() {
         <ActivityCard
           key={activity.id}
           activity={activity}
-          isBusy={busyId === activity.id}
+          isBusy={
+            (signUpMutation.isPending && signUpMutation.variables === activity.id) ||
+            (cancelMutation.isPending && cancelMutation.variables === activity.id)
+          }
           onSignUp={signUp}
-          onCancel={cancel}
+          onCancel={(a) => cancelMutation.mutate(a.id)}
         />
       ))}
     </>
@@ -185,13 +154,14 @@ function ActivityCard({
     .join(' · ')
 
   const isFull = !activity.isSignedUp && activity.availableSpots === 0
-  const dateBoxClass = activity.isSignedUp ? 'bg-success-soft text-success' : 'bg-accent-soft text-accent'
 
   return (
-    <Card
-      className={`${cardClass} flex-row flex-wrap items-center gap-6 sm:flex-nowrap ${activity.isSignedUp ? 'border-2 border-success' : ''}`}
-    >
-      <div className={`flex size-21 flex-none flex-col items-center justify-center rounded-xl ${dateBoxClass}`}>
+    <Card className={`flex-row flex-wrap items-center gap-6 sm:flex-nowrap ${activity.isSignedUp ? 'border-2 border-success' : ''}`}>
+      <div
+        className={`flex size-21 flex-none flex-col items-center justify-center rounded-xl ${
+          activity.isSignedUp ? 'bg-success-soft text-success' : 'bg-accent-soft text-accent'
+        }`}
+      >
         <span className="text-base font-bold uppercase">{formatShortWeekday(activity.start)}</span>
         <span className="text-2xl font-extrabold text-foreground">{formatDayNumber(activity.start)}</span>
       </div>
@@ -203,7 +173,7 @@ function ActivityCard({
 
       {activity.isSignedUp ? (
         <div className="flex flex-none flex-col items-end gap-2">
-          <Chip className="h-auto gap-2 rounded-full bg-success px-5 py-2.5 text-lg font-bold text-success-foreground">
+          <Chip color="success" variant="primary" size="lg" className="gap-2">
             <Check className="size-5" strokeWidth={3} aria-hidden />
             <Chip.Label>Du er tilmeldt</Chip.Label>
           </Chip>

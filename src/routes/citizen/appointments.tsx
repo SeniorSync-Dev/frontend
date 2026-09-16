@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react'
 import { createFileRoute, Navigate } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, EmptyState, Spinner } from '@heroui/react'
 import { CalendarDays, Check, MapPin, Video, type LucideIcon } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
-import { fetchAppointments } from '../../lib/citizen/api'
-import { appointmentTypeLabel, upcomingAppointments } from '../../lib/citizen/appointments'
+import { useAppointments } from '../../lib/citizen/api'
+import { appointmentTypeLabel } from '../../lib/citizen/appointments'
 import { formatDateLabel, formatTime } from '../../lib/citizen/format'
-import { cardClass, largeButton } from '../../lib/citizen/styles'
-import type { Appointment, AppointmentType } from '../../lib/citizen/types'
+import { largeButton } from '../../lib/citizen/styles'
+import type { AppointmentType, Appointment } from '#/models/appointment'
 
 export const Route = createFileRoute('/citizen/appointments')({
   component: Appointments,
@@ -17,22 +16,7 @@ function Appointments() {
   const { data: organizations, isPending: isOrganizationsPending } = authClient.useListOrganizations()
   const careHome = organizations?.[0]
 
-  const [appointments, setAppointments] = useState<Array<Appointment> | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  async function reload() {
-    try {
-      setAppointments(await fetchAppointments())
-      setError(null)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Kunne ikke hente dine aftaler.')
-    }
-  }
-
-  useEffect(() => {
-    if (careHome) reload()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [careHome?.id])
+  const { data: appointments, error, refetch } = useAppointments()
 
   if (isOrganizationsPending || (careHome && !appointments && !error)) {
     return (
@@ -53,21 +37,21 @@ function Appointments() {
           <Alert.Indicator />
           <Alert.Content>
             <Alert.Title className="text-xl">Vi kunne ikke hente dine aftaler</Alert.Title>
-            <Alert.Description className="text-lg">{error}</Alert.Description>
+            <Alert.Description className="text-lg">{error.message}</Alert.Description>
           </Alert.Content>
         </Alert>
-        <Button variant="primary" className={`${largeButton} self-start`} onPress={reload}>
+        <Button variant="primary" className={`${largeButton} self-start`} onPress={() => refetch()}>
           Prøv igen
         </Button>
       </div>
     )
   }
 
-  const upcoming = upcomingAppointments(appointments ?? [])
+  const upcoming = appointments ?? []
 
   if (upcoming.length === 0) {
     return (
-      <EmptyState className={`${cardClass} flex flex-col items-center gap-4 px-8 py-12 text-center`}>
+      <EmptyState className="flex flex-col items-center gap-4 px-8 py-12 text-center">
         <span className="flex size-21 items-center justify-center rounded-full bg-accent-soft text-accent">
           <CalendarDays className="size-10" aria-hidden />
         </span>
@@ -95,19 +79,17 @@ const typeIcon: Record<AppointmentType, LucideIcon> = {
   activity: Check,
 }
 
-const typeChipClass: Record<AppointmentType, string> = {
-  screen_visit: 'bg-accent-soft text-accent',
-  home_visit: 'bg-(--brand-soft) text-(--brand)',
-  activity: 'bg-success-soft text-success',
+const typeChipColor: Record<AppointmentType, 'accent' | 'success'> = {
+  screen_visit: 'accent',
+  home_visit: 'accent',
+  activity: 'success',
 }
 
 function AppointmentCard({ appointment, highlighted }: { appointment: Appointment; highlighted: boolean }) {
   const Icon = typeIcon[appointment.type]
 
   return (
-    <Card
-      className={`${cardClass} flex-row flex-wrap items-center gap-6 sm:flex-nowrap ${highlighted ? 'border-2 border-accent' : ''}`}
-    >
+    <Card className={`flex-row flex-wrap items-center gap-6 sm:flex-nowrap ${highlighted ? 'border-2 border-accent' : ''}`}>
       <div className="flex size-21 flex-none flex-col items-center justify-center rounded-xl bg-accent-soft text-accent">
         <span className="text-base font-bold uppercase">{formatDateLabel(appointment.start)}</span>
         <span className="text-2xl font-extrabold text-foreground">{formatTime(appointment.start)}</span>
@@ -120,7 +102,7 @@ function AppointmentCard({ appointment, highlighted }: { appointment: Appointmen
         )}
       </Card.Content>
 
-      <Chip className={`h-auto flex-none gap-2 rounded-full px-5 py-2.5 text-lg font-bold ${typeChipClass[appointment.type]}`}>
+      <Chip color={typeChipColor[appointment.type]} variant="soft" size="lg" className="flex-none gap-2">
         <Icon className="size-5" strokeWidth={appointment.type === 'activity' ? 3 : 2} aria-hidden />
         <Chip.Label>{appointmentTypeLabel[appointment.type]}</Chip.Label>
       </Chip>

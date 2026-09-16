@@ -1,5 +1,8 @@
 export const API_BASE_URL = 'http://localhost:3000'
 
+// Polling interval for API requests
+export const POLL_INTERVAL_MS = 60_000
+
 export class ApiError extends Error {
   constructor(
     message: string,
