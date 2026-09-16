@@ -1,13 +1,14 @@
 import { createAuthClient } from "better-auth/react";
 import {
-    inferAdditionalFields,
     organizationClient,
+    inferAdditionalFields,
 } from "better-auth/client/plugins";
 import {
     ac,
     citizen,
     employee,
     relative,
+    servicePartner,
     systemAdmin,
 } from "./accessController";
 import { API_BASE_URL } from "./api";
@@ -24,6 +25,7 @@ export const authClient = createAuthClient({
                 citizen,
                 relative,
                 employee,
+                servicePartner,
                 systemAdmin,
             },
         }),
