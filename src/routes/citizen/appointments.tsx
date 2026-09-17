@@ -2,9 +2,9 @@ import { createFileRoute, Navigate } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, EmptyState, Spinner } from '@heroui/react'
 import { CalendarDays, Check, MapPin, Video, type LucideIcon } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
-import { useAppointments } from '../../lib/citizen/api'
+import { useAppointments, useCancelActivitySignup } from '../../lib/citizen/api'
 import { appointmentTypeLabel } from '../../lib/citizen/appointments'
-import { formatDateLabel, formatTime } from '../../lib/citizen/format'
+import { formatDateLabel, formatTime, formatTimeRange } from '../../lib/citizen/format'
 import { largeButton } from '../../lib/citizen/styles'
 import type { AppointmentType, Appointment } from '#/models/appointment'
 
@@ -17,6 +17,7 @@ function Appointments() {
   const careHome = organizations?.[0]
 
   const { data: appointments, error, refetch } = useAppointments()
+  const cancelMutation = useCancelActivitySignup()
 
   if (isOrganizationsPending || (careHome && !appointments && !error)) {
     return (
@@ -65,9 +66,25 @@ function Appointments() {
 
   return (
     <>
+      {cancelMutation.error && (
+        <Alert status="danger">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title className="text-xl">Det lykkedes ikke</Alert.Title>
+            <Alert.Description className="text-lg">{cancelMutation.error.message}</Alert.Description>
+          </Alert.Content>
+        </Alert>
+      )}
+
       <p className="text-2xl text-muted">Her er dine næste aftaler - én ad gangen:</p>
       {upcoming.map((appointment, index) => (
-        <AppointmentCard key={appointment.id} appointment={appointment} highlighted={index === 0} />
+        <AppointmentCard
+          key={appointment.id}
+          appointment={appointment}
+          highlighted={index === 0}
+          isCancelling={cancelMutation.isPending && cancelMutation.variables === appointment.id}
+          onCancel={() => cancelMutation.mutate(appointment.id)}
+        />
       ))}
     </>
   )
@@ -85,8 +102,21 @@ const typeChipColor: Record<AppointmentType, 'accent' | 'success'> = {
   activity: 'success',
 }
 
-function AppointmentCard({ appointment, highlighted }: { appointment: Appointment; highlighted: boolean }) {
+function AppointmentCard({
+  appointment,
+  highlighted,
+  isCancelling,
+  onCancel,
+}: {
+  appointment: Appointment
+  highlighted: boolean
+  isCancelling: boolean
+  onCancel: () => void
+}) {
   const Icon = typeIcon[appointment.type]
+  const details = [`Kl. ${formatTimeRange(appointment.start, appointment.end)}`, appointment.location]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
     <Card className={`flex-row flex-wrap items-center gap-6 sm:flex-nowrap ${highlighted ? 'border-2 border-accent' : ''}`}>
@@ -97,15 +127,28 @@ function AppointmentCard({ appointment, highlighted }: { appointment: Appointmen
 
       <Card.Content className="min-w-0 gap-1">
         <Card.Title className="text-2xl leading-tight font-bold">{appointment.title}</Card.Title>
+        <Card.Description className="text-xl leading-snug">{details}</Card.Description>
         {appointment.description && (
           <Card.Description className="text-xl leading-snug">{appointment.description}</Card.Description>
         )}
       </Card.Content>
 
-      <Chip color={typeChipColor[appointment.type]} variant="soft" size="lg" className="flex-none gap-2">
-        <Icon className="size-5" strokeWidth={appointment.type === 'activity' ? 3 : 2} aria-hidden />
-        <Chip.Label>{appointmentTypeLabel[appointment.type]}</Chip.Label>
-      </Chip>
+      <div className="flex flex-none flex-col items-end gap-2">
+        <Chip color={typeChipColor[appointment.type]} variant="soft" size="lg" className="gap-2">
+          <Icon className="size-5" strokeWidth={appointment.type === 'activity' ? 3 : 2} aria-hidden />
+          <Chip.Label>{appointmentTypeLabel[appointment.type]}</Chip.Label>
+        </Chip>
+        {appointment.type === 'activity' && (
+          <Button
+            variant="ghost"
+            className="h-12 rounded-xl px-4 text-lg font-semibold text-accent underline underline-offset-4"
+            isPending={isCancelling}
+            onPress={onCancel}
+          >
+            Afmeld dig
+          </Button>
+        )}
+      </div>
     </Card>
   )
 }

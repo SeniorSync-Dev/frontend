@@ -4,7 +4,7 @@ import { CalendarDays, Check, ChevronRight, Clock, MapPin, Phone, Users, Video, 
 import { authClient } from '../../lib/auth-client'
 import { useAppointments } from '../../lib/citizen/api'
 import { nextAppointment, nextAppointmentHeading } from '../../lib/citizen/appointments'
-import { firstName, formatLongDate, formatRelativeDay, formatTime, greeting } from '../../lib/citizen/format'
+import { firstName, formatLongDate, formatRelativeDay, formatTimeRange, greeting } from '../../lib/citizen/format'
 import { xlButton } from '../../lib/citizen/styles'
 import type { AppointmentType, Appointment } from '#/models/appointment'
 
@@ -114,14 +114,13 @@ const typeIcon: Record<AppointmentType, LucideIcon> = {
 
 function NextAppointment({ appointment, now }: { appointment: Appointment; now: Date }) {
   const Icon = typeIcon[appointment.type]
-  const heading = nextAppointmentHeading(
-    appointment,
-    formatRelativeDay(appointment.start, now),
-    formatTime(appointment.start),
-  )
+  const heading = nextAppointmentHeading(appointment, formatRelativeDay(appointment.start, now))
   const subtitle = [appointment.staffName && `med ${appointment.staffName}`, appointment.description]
     .filter(Boolean)
     .join(' - ')
+  const meta = [`Kl. ${formatTimeRange(appointment.start, appointment.end)}`, appointment.location]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
     <div className="flex flex-wrap items-center gap-6 sm:flex-nowrap">
@@ -131,6 +130,7 @@ function NextAppointment({ appointment, now }: { appointment: Appointment; now: 
       <div className="min-w-0">
         <p className="text-3xl leading-tight font-bold">{heading}</p>
         {subtitle && <p className="mt-1 text-2xl text-muted">{subtitle}</p>}
+        <p className="mt-1 text-2xl text-muted">{meta}</p>
       </div>
     </div>
   )

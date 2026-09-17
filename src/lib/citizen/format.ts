@@ -22,7 +22,7 @@ export function formatTime(date: Date) {
 }
 
 export function formatTimeRange(start: Date, end?: Date) {
-  return end ? `${formatTime(start)}–${formatTime(end)}` : formatTime(start)
+  return end ? `${formatTime(start)}-${formatTime(end)}` : formatTime(start)
 }
 
 export function formatShortWeekday(date: Date) {

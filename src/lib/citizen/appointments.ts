@@ -10,11 +10,11 @@ export const appointmentTypeLabel: Record<AppointmentType, string> = {
   activity: 'Tilmeldt',
 }
 
-export function nextAppointmentHeading(appointment: Appointment, dayText: string, timeText: string) {
+export function nextAppointmentHeading(appointment: Appointment, dayText: string) {
   const name: Record<AppointmentType, string> = {
     screen_visit: 'Skærmbesøg',
     home_visit: 'Besøg',
     activity: appointment.title,
   }
-  return `${name[appointment.type]} ${dayText} kl. ${timeText}`
+  return `${name[appointment.type]} ${dayText}`
 }

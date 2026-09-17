@@ -46,8 +46,11 @@ export function useSignUpForActivity() {
 
   return useMutation({
     mutationFn: (activityId: string) =>
-      apiRequest<ActivityDto>(`/citizen/activities/${activityId}/signup`, { method: 'POST' }).then(parseActivity),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['citizen', 'activities'] }),
+      apiRequest<ActivityViewModel>(`/citizen/activities/${activityId}/signup`, { method: 'POST' }).then(parseActivity),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['citizen', 'activities'] })
+      queryClient.invalidateQueries({ queryKey: ['citizen', 'appointments'] })
+    },
   })
 }
 
@@ -56,7 +59,10 @@ export function useCancelActivitySignup() {
 
   return useMutation({
     mutationFn: (activityId: string) =>
-      apiRequest<ActivityDto>(`/citizen/activities/${activityId}/signup`, { method: 'DELETE' }).then(parseActivity),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['citizen', 'activities'] }),
+      apiRequest<ActivityViewModel>(`/citizen/activities/${activityId}/signup`, { method: 'DELETE' }).then(parseActivity),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['citizen', 'activities'] })
+      queryClient.invalidateQueries({ queryKey: ['citizen', 'appointments'] })
+    },
   })
 }
