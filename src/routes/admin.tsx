@@ -64,6 +64,10 @@ function AdminLayout() {
                 <DashboardIcon />
                 Organisation
               </Link>
+              <Link to="/admin/visits" className={navClassName} activeProps={{ className: activeNavClassName }}>
+                <AlarmIcon />
+                Besøg
+              </Link>
               <Link to="/admin/kioskPage" className={navClassName} activeProps={{ className: activeNavClassName }}>
                 <AlarmIcon />
                 Alarmoversigt
