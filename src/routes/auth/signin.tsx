@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Alert, Button, Card } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
+import { describeAuthError, type AuthError } from '../../lib/auth-errors'
 
 type LoginAs = 'borger' | 'paaroerende'
 
@@ -33,40 +34,6 @@ const loginAsAccountType: Record<LoginAs, AccountType> = {
   paaroerende: 'relative',
 }
 
-type AuthError = {
-  status: 'default' | 'warning' | 'danger'
-  title: string
-  text: string
-}
-
-function describeAuthError(code?: string, description?: string): AuthError | null {
-  if (!code) return null
-
-  switch (code) {
-    case 'IDP-3200':
-    case 'access_denied':
-      return {
-        status: 'default',
-        title: 'Login blev afbrudt',
-        text: 'Du afbrød MitID-login. Du kan prøve igen, når du er klar.',
-      }
-    case 'state_mismatch':
-    case 'invalid_state':
-    case 'state_not_found':
-      return {
-        status: 'warning',
-        title: 'Login udløb',
-        text: 'Der gik for lang tid, eller siden blev åbnet i en anden browser. Prøv igen.',
-      }
-    default:
-      return {
-        status: 'danger',
-        title: 'Login mislykkedes',
-        text: description || 'Der opstod en fejl under login. Prøv venligst igen.',
-      }
-  }
-}
-
 function Signin() {
   const navigate = Route.useNavigate()
   const { as: loginAs, error: errorCode, error_description } = Route.useSearch()
@@ -84,7 +51,7 @@ function Signin() {
   function signInWithMitID() {
     authClient.signIn.social({
       provider: 'mitid',
-      callbackURL: `${window.location.origin}/auth/profile`,
+      callbackURL: `${window.location.origin}${loginAs === 'borger' ? '/citizen' : '/auth/profile'}`,
       errorCallbackURL: `${window.location.origin}/auth/signin`,
       additionalData: {
         accountType: loginAs ? loginAsAccountType[loginAs] : 'relative',

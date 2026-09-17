@@ -2,18 +2,67 @@
 @import "@heroui/styles";
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html,
 body,
 #app {
-    min-height: 100%;
+  min-height: 100%;
 }
 
 body {
-    margin: 0;
-    background-color: var(--background);
-    color: var(--foreground);
-    -webkit-font-smoothing: antialiased;
+  margin: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+.theme-citizen {
+  --brand: #0f4c5c;
+  --brand-soft: #eef7f6;
+
+  --background: #f7f8fc;
+  --foreground: #111827;
+  --muted: #374151;
+
+  --surface: #ffffff;
+  --surface-foreground: var(--foreground);
+  --surface-hover: color-mix(in oklab, var(--surface) 94%, var(--foreground) 6%);
+  --overlay: #ffffff;
+  --overlay-foreground: var(--foreground);
+
+  --border: #d8deed;
+  --separator: #e5e7eb;
+  --radius: 0.5rem;
+
+  --default: #f3f4f6;
+  --default-foreground: #374151;
+  --default-hover: #e5e7eb;
+
+  --accent: #3a5ba0;
+  --accent-foreground: #ffffff;
+  --accent-hover: color-mix(in oklab, var(--accent) 88%, black 12%);
+  --accent-soft: #eef1fa;
+  --accent-soft-foreground: var(--accent);
+  --accent-soft-hover: #e1e7f6;
+
+  --danger: #b91c1c;
+  --danger-foreground: #ffffff;
+  --danger-hover: color-mix(in oklab, var(--danger) 88%, black 12%);
+  --danger-soft: #fef2f2;
+  --danger-soft-foreground: var(--danger);
+  --danger-soft-hover: #fee2e2;
+
+  --success: #15803d;
+  --success-foreground: #ffffff;
+  --success-hover: color-mix(in oklab, var(--success) 88%, black 12%);
+  --success-soft: #f0fdf4;
+  --success-soft-foreground: var(--success);
+  --success-soft-hover: #dcfce7;
+
+  --focus: var(--accent);
+  --link: var(--accent);
 }

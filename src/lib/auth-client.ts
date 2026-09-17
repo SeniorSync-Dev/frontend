@@ -6,16 +6,16 @@ import {
 import {
     ac,
     citizen,
-    relative,
     employee,
+    relative,
     servicePartner,
     systemAdmin,
 } from "./accessController";
+import { API_BASE_URL } from "./api";
 
-export const API_BASE_URL = "http://localhost:3000";
+export { API_BASE_URL };
 
 export const authClient = createAuthClient({
-    /** The base URL of the server (optional if you're using the same domain) */
     baseURL: API_BASE_URL,
 
     plugins: [
