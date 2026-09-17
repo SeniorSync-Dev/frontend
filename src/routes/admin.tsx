@@ -68,9 +68,13 @@ function AdminLayout() {
                 <AlarmIcon />
                 Alarmoversigt
               </Link>
+              <Link to="/admin/facilities" className={navClassName} activeProps={{ className: activeNavClassName }}>
+                <AlarmIcon />
+                Faciliteter
+              </Link>
               <Link to="/admin/activities" className={navClassName} activeProps={{ className: activeNavClassName }}>
                 <AlarmIcon />
-                Activities
+                Aktiviteter
               </Link>
             </nav>
           )}
