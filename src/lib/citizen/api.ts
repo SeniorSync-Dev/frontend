@@ -4,24 +4,24 @@ import type { Appointment } from '#/models/appointment'
 import type { Activity } from '#/models/activity'
 
 // The backend sends dates as ISO strings (JSON has no Date type) so these Model types are raw strings before we parse start/end into Dates
-type AppointmentDto = Omit<Appointment, 'start' | 'end'> & { start: string; end?: string }
-type ActivityDto = Omit<Activity, 'start' | 'end'> & { start: string; end?: string }
+type AppointmentViewModel = Omit<Appointment, 'start' | 'end'> & { start: string; end?: string }
+type ActivityViewModel = Omit<Activity, 'start' | 'end'> & { start: string; end?: string }
 
-function parseAppointment(dto: AppointmentDto): Appointment {
+function parseAppointment(dto: AppointmentViewModel): Appointment {
   return { ...dto, start: new Date(dto.start), end: dto.end ? new Date(dto.end) : undefined }
 }
 
-function parseActivity(dto: ActivityDto): Activity {
+function parseActivity(dto: ActivityViewModel): Activity {
   return { ...dto, start: new Date(dto.start), end: dto.end ? new Date(dto.end) : undefined }
 }
 
 async function fetchAppointments(): Promise<Appointment[]> {
-  const dtos = await apiRequest<AppointmentDto[]>('/citizen/appointments')
+  const dtos = await apiRequest<AppointmentViewModel[]>('/citizen/appointments')
   return dtos.map(parseAppointment)
 }
 
 async function fetchActivities(): Promise<Activity[]> {
-  const dtos = await apiRequest<ActivityDto[]>('/citizen/activities')
+  const dtos = await apiRequest<ActivityViewModel[]>('/citizen/activities')
   return dtos.map(parseActivity)
 }
 
