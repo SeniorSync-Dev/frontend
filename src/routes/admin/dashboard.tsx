@@ -1,20 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Alert, Button, Card, Input, Spinner } from '@heroui/react'
-import { authClient, API_BASE_URL } from '../../lib/auth-client'
+import { authClient } from '../../lib/auth-client'
+import { useFacilities } from '../../lib/admin/facilities'
+import {
+  useCancelInvitation,
+  useInvitations,
+  useInviteMember,
+  useMembers,
+  useUpdateMemberRole,
+} from '../../lib/admin/organization'
+import { orgRoleLabels } from '../../models/organization'
+import type { OrgRole } from '../../models/organization'
+import type { Facility } from '../../models/facility'
 
 export const Route = createFileRoute('/admin/dashboard')({
   component: RouteComponent,
 })
-
-const roleLabels = {
-  citizen: 'Borger',
-  relative: 'Pårørende',
-  employee: 'Medarbejder',
-  systemAdmin: 'Systemadministrator',
-} as const
-
-type OrgRole = keyof typeof roleLabels
 
 function RoleSelect({ value, onChange }: { value: string; onChange: (role: OrgRole) => void }) {
   return (
@@ -23,7 +25,7 @@ function RoleSelect({ value, onChange }: { value: string; onChange: (role: OrgRo
       value={value}
       onChange={(e) => onChange(e.target.value as OrgRole)}
     >
-      {Object.entries(roleLabels).map(([role, label]) => (
+      {Object.entries(orgRoleLabels).map(([role, label]) => (
         <option key={role} value={role}>
           {label}
         </option>
@@ -31,10 +33,6 @@ function RoleSelect({ value, onChange }: { value: string; onChange: (role: OrgRo
     </select>
   )
 }
-
-type Member = { id: string; role: string; user: { name: string; email: string } }
-type Invitation = { id: string; email: string; role: string; status: string }
-type Facility = { id: string; name: string }
 
 function FacilitySelect({
   facilities,
@@ -71,60 +69,40 @@ function RouteComponent() {
   const organization =
     organizations?.find((org) => org.id === session?.session.activeOrganizationId) ?? organizations?.[0]
 
-  const [members, setMembers] = useState<Array<Member>>([])
-  const [invitations, setInvitations] = useState<Array<Invitation>>([])
-  const [facilities, setFacilities] = useState<Array<Facility>>([])
-  const [error, setError] = useState<string | null>(null)
+  const { data: members = [], isError: membersError } = useMembers(organization?.id)
+  const { data: invitations = [], isError: invitationsError } = useInvitations(organization?.id)
+  const { data: facilities = [], isError: facilitiesError } = useFacilities()
+  const inviteMember = useInviteMember(organization?.id)
+  const updateMemberRole = useUpdateMemberRole(organization?.id)
+  const cancelInvitation = useCancelInvitation(organization?.id)
+
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<OrgRole>('citizen')
   const [inviteFacilityId, setInviteFacilityId] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
-  async function reload() {
-    if (!organization) return
-    const [{ data: memberData, error: memberError }, { data: invitationData, error: invitationError }] =
-      await Promise.all([
-        authClient.organization.listMembers({ query: { organizationId: organization.id } }),
-        authClient.organization.listInvitations({ query: { organizationId: organization.id } }),
-      ])
+  const error =
+    membersError || invitationsError || facilitiesError
+      ? 'Kunne ikke hente organisationsdata.'
+      : (inviteMember.error?.message ??
+        updateMemberRole.error?.message ??
+        cancelInvitation.error?.message ??
+        null)
 
-    if (memberError || invitationError) {
-      setError(memberError?.message ?? invitationError?.message ?? 'Kunne ikke hente organisationsdata.')
-    } else {
-      setMembers(memberData?.members ?? [])
-      setInvitations(invitationData ?? [])
-    }
-  }
-
-  useEffect(() => {
-    reload()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organization?.id])
-
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/api/facilities`, { credentials: 'include' })
-      .then((response) => (response.ok ? response.json() : []))
-      .then(setFacilities)
-  }, [organization?.id])
-
-  async function handleInvite(e: React.FormEvent) {
+  function handleInvite(e: React.FormEvent) {
     e.preventDefault()
     if (!organization || !inviteEmail) return
     if (inviteRole === 'citizen' && !inviteFacilityId) return
 
-    const { error: inviteError } = await authClient.organization.inviteMember({
-      organizationId: organization.id,
-      email: inviteEmail,
-      role: inviteRole,
-      ...(inviteRole === 'citizen' ? { facilityId: inviteFacilityId } : {}),
-    })
-    if (inviteError) {
-      setError(inviteError.message ?? 'Kunne ikke oprette invitationen.')
-      return
-    }
-    setInviteEmail('')
-    setInviteFacilityId('')
-    await reload()
+    inviteMember.mutate(
+      { email: inviteEmail, role: inviteRole, facilityId: inviteRole === 'citizen' ? inviteFacilityId : undefined },
+      {
+        onSuccess: () => {
+          setInviteEmail('')
+          setInviteFacilityId('')
+        },
+      },
+    )
   }
 
   async function copyInvitationLink(invitationId: string) {
@@ -243,11 +221,7 @@ function RouteComponent() {
                 </div>
                 <RoleSelect
                   value={member.role}
-                  onChange={(role) =>
-                    authClient.organization
-                      .updateMemberRole({ organizationId: organization.id, memberId: member.id, role })
-                      .then(reload)
-                  }
+                  onChange={(role) => updateMemberRole.mutate({ memberId: member.id, role })}
                 />
               </div>
             ))
@@ -297,20 +271,14 @@ function RouteComponent() {
                 <div>
                   <p className="text-sm font-medium">{invitation.email}</p>
                   <p className="text-sm text-muted">
-                    {roleLabels[invitation.role as OrgRole] ?? invitation.role}
+                    {orgRoleLabels[invitation.role as OrgRole] ?? invitation.role}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="secondary" size="sm" onPress={() => copyInvitationLink(invitation.id)}>
                     {copiedId === invitation.id ? 'Kopieret!' : 'Kopiér link'}
                   </Button>
-                  <Button
-                    variant="danger-soft"
-                    size="sm"
-                    onPress={() =>
-                      authClient.organization.cancelInvitation({ invitationId: invitation.id }).then(reload)
-                    }
-                  >
+                  <Button variant="danger-soft" size="sm" onPress={() => cancelInvitation.mutate(invitation.id)}>
                     Annullér
                   </Button>
                 </div>

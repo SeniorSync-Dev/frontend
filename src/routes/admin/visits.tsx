@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, Input } from '@heroui/react'
-import { API_BASE_URL } from '../../lib/auth-client'
+import { useCreateVisit, useVisitOptions, useVisits } from '../../lib/admin/visits'
+import { visitStatusLabels } from '../../models/visit'
 
 export const Route = createFileRoute('/admin/visits')({
   component: RouteComponent,
@@ -21,32 +22,6 @@ function formatRange(scheduledStart: string, scheduledEnd: string | null) {
   return `${dateFormatter.format(start)} - ${dateFormatter.format(end)}`
 }
 
-const statusLabels = {
-  planned: 'Planlagt',
-  in_progress: 'I gang',
-  completed: 'Gennemført',
-  cancelled: 'Aflyst',
-  missed: 'Udeblevet',
-} as const
-
-type VisitStatus = keyof typeof statusLabels
-
-type Visit = {
-  id: string
-  title: string
-  description: string | null
-  scheduledStart: string
-  scheduledEnd: string | null
-  status: VisitStatus
-  citizenUserId: string
-  citizenName: string
-  assignedEmployeeId: string | null
-  employeeName: string | null
-}
-
-type Citizen = { userId: string; name: string }
-type Employee = { id: string; name: string }
-
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
@@ -57,62 +32,47 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function RouteComponent() {
-  const [visits, setVisits] = useState<Array<Visit>>([])
-  const [citizens, setCitizens] = useState<Array<Citizen>>([])
-  const [employees, setEmployees] = useState<Array<Employee>>([])
-  const [error, setError] = useState<string | null>(null)
+  const { data: visits = [], isError: visitsError } = useVisits()
+  const { data: options, isError: optionsError } = useVisitOptions()
+  const citizens = options?.citizens ?? []
+  const employees = options?.employees ?? []
+  const createVisit = useCreateVisit()
+
   const [title, setTitle] = useState('')
   const [citizenUserId, setCitizenUserId] = useState('')
   const [assignedEmployeeId, setAssignedEmployeeId] = useState('')
   const [scheduledStart, setScheduledStart] = useState('')
   const [scheduledEnd, setScheduledEnd] = useState('')
 
-  async function reload() {
-    const [visitsResponse, optionsResponse] = await Promise.all([
-      fetch(`${API_BASE_URL}/api/visits`, { credentials: 'include' }),
-      fetch(`${API_BASE_URL}/api/visits/options`, { credentials: 'include' }),
-    ])
-    if (!visitsResponse.ok || !optionsResponse.ok) {
-      setError('Kunne ikke hente besøg.')
-      return
-    }
-    setVisits(await visitsResponse.json())
-    const options = await optionsResponse.json()
-    setCitizens(options.citizens)
-    setEmployees(options.employees)
-  }
+  const error =
+    visitsError || optionsError
+      ? 'Kunne ikke hente besøg.'
+      : createVisit.isError
+        ? 'Kunne ikke oprette besøget.'
+        : null
 
-  useEffect(() => {
-    reload()
-  }, [])
-
-  async function handleCreate(e: React.FormEvent) {
+  function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     if (!citizenUserId || !scheduledStart) return
 
-    const response = await fetch(`${API_BASE_URL}/api/visits`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    createVisit.mutate(
+      {
         citizenUserId,
         assignedEmployeeId: assignedEmployeeId || undefined,
         title: title || undefined,
         scheduledStart,
         scheduledEnd: scheduledEnd || undefined,
-      }),
-    })
-    if (!response.ok) {
-      setError('Kunne ikke oprette besøget.')
-      return
-    }
-
-    setTitle('')
-    setCitizenUserId('')
-    setAssignedEmployeeId('')
-    setScheduledStart('')
-    setScheduledEnd('')
-    await reload()
+      },
+      {
+        onSuccess: () => {
+          setTitle('')
+          setCitizenUserId('')
+          setAssignedEmployeeId('')
+          setScheduledStart('')
+          setScheduledEnd('')
+        },
+      },
+    )
   }
 
   return (
@@ -212,7 +172,7 @@ function RouteComponent() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium">{visit.title}</p>
                     <Chip variant="soft" color="accent" size="sm">
-                      <Chip.Label>{statusLabels[visit.status]}</Chip.Label>
+                      <Chip.Label>{visitStatusLabels[visit.status]}</Chip.Label>
                     </Chip>
                   </div>
                   <p className="text-sm text-muted">{formatRange(visit.scheduledStart, visit.scheduledEnd)}</p>

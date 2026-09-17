@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, Input } from '@heroui/react'
-import { API_BASE_URL } from '../../lib/auth-client'
+import { useActivities, useCreateActivity, useDeleteActivity } from '../../lib/admin/activities'
+import { useFacilities } from '../../lib/admin/facilities'
+import { activityTypeLabels } from '../../models/admin-activity'
+import type { ActivityType } from '../../models/admin-activity'
 
 export const Route = createFileRoute('/admin/activities')({
   component: RouteComponent,
@@ -19,32 +22,6 @@ function formatRange(startsAt: string, endsAt: string) {
   return `${dateFormatter.format(start)} – ${dateFormatter.format(end)}`
 }
 
-const typeLabels = {
-  outing: 'Udflugt',
-  sports: 'Sport',
-  social: 'Socialt',
-  healthcare: 'Sundhedspleje',
-  training: 'Træning',
-  other: 'Andet',
-} as const
-
-type ActivityType = keyof typeof typeLabels
-
-type Activity = {
-  id: string
-  title: string
-  type: ActivityType
-  startsAt: string
-  endsAt: string
-  capacity: number | null
-  locationName: string | null
-}
-
-type Facility = {
-  id: string
-  name: string
-}
-
 function TypeSelect({ value, onChange }: { value: ActivityType; onChange: (type: ActivityType) => void }) {
   return (
     <select
@@ -52,7 +29,7 @@ function TypeSelect({ value, onChange }: { value: ActivityType; onChange: (type:
       value={value}
       onChange={(e) => onChange(e.target.value as ActivityType)}
     >
-      {Object.entries(typeLabels).map(([type, label]) => (
+      {Object.entries(activityTypeLabels).map(([type, label]) => (
         <option key={type} value={type}>
           {label}
         </option>
@@ -71,9 +48,11 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function RouteComponent() {
-  const [activities, setActivities] = useState<Array<Activity>>([])
-  const [facilities, setFacilities] = useState<Array<Facility>>([])
-  const [error, setError] = useState<string | null>(null)
+  const { data: activities = [], isError: activitiesError } = useActivities()
+  const { data: facilities = [], isError: facilitiesError } = useFacilities()
+  const createActivity = useCreateActivity()
+  const deleteActivity = useDeleteActivity()
+
   const [title, setTitle] = useState('')
   const [type, setType] = useState<ActivityType>('other')
   const [facilityId, setFacilityId] = useState('')
@@ -82,58 +61,36 @@ function RouteComponent() {
   const [capacity, setCapacity] = useState('')
   const [locationName, setLocationName] = useState('')
 
-  async function reload() {
-    const [activitiesResponse, facilitiesResponse] = await Promise.all([
-      fetch(`${API_BASE_URL}/api/activities`, { credentials: 'include' }),
-      fetch(`${API_BASE_URL}/api/facilities`, { credentials: 'include' }),
-    ])
-    if (!activitiesResponse.ok || !facilitiesResponse.ok) {
-      setError('Kunne ikke hente aktiviteter.')
-      return
-    }
-    setActivities(await activitiesResponse.json())
-    setFacilities(await facilitiesResponse.json())
-  }
+  const error = activitiesError || facilitiesError
+    ? 'Kunne ikke hente aktiviteter.'
+    : createActivity.isError
+      ? 'Kunne ikke oprette aktiviteten.'
+      : deleteActivity.isError
+        ? 'Kunne ikke fjerne aktiviteten.'
+        : null
 
-  useEffect(() => {
-    reload()
-  }, [])
-
-  async function handleCreate(e: React.FormEvent) {
+  function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     if (!title || !startsAt || !endsAt) return
 
-    const response = await fetch(`${API_BASE_URL}/api/activities`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, type, startsAt, endsAt, capacity, locationName, facilityId: facilityId || undefined }),
-    })
-    if (!response.ok) {
-      setError('Kunne ikke oprette aktiviteten.')
-      return
-    }
-
-    setTitle('')
-    setType('other')
-    setFacilityId('')
-    setStartsAt('')
-    setEndsAt('')
-    setCapacity('')
-    setLocationName('')
-    await reload()
+    createActivity.mutate(
+      { title, type, startsAt, endsAt, capacity, locationName, facilityId: facilityId || undefined },
+      {
+        onSuccess: () => {
+          setTitle('')
+          setType('other')
+          setFacilityId('')
+          setStartsAt('')
+          setEndsAt('')
+          setCapacity('')
+          setLocationName('')
+        },
+      },
+    )
   }
 
-  async function removeActivity(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/activities/${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    })
-    if (!response.ok) {
-      setError('Kunne ikke fjerne aktiviteten.')
-      return
-    }
-    await reload()
+  function removeActivity(id: string) {
+    deleteActivity.mutate(id)
   }
 
   return (
@@ -216,7 +173,7 @@ function RouteComponent() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium">{activity.title}</p>
                     <Chip variant="soft" color="accent" size="sm">
-                      <Chip.Label>{typeLabels[activity.type]}</Chip.Label>
+                      <Chip.Label>{activityTypeLabels[activity.type]}</Chip.Label>
                     </Chip>
                   </div>
                   <p className="text-sm text-muted">
