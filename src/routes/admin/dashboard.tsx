@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Alert, Button, Card, Input, Spinner } from '@heroui/react'
-import { authClient } from '../../lib/auth-client'
+import { authClient, API_BASE_URL } from '../../lib/auth-client'
 
 export const Route = createFileRoute('/admin/dashboard')({
   component: RouteComponent,
@@ -34,6 +34,35 @@ function RoleSelect({ value, onChange }: { value: string; onChange: (role: OrgRo
 
 type Member = { id: string; role: string; user: { name: string; email: string } }
 type Invitation = { id: string; email: string; role: string; status: string }
+type Facility = { id: string; name: string }
+
+function FacilitySelect({
+  facilities,
+  value,
+  onChange,
+}: {
+  facilities: Array<Facility>
+  value: string
+  onChange: (facilityId: string) => void
+}) {
+  return (
+    <select
+      required
+      className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      <option value="" disabled>
+        Vælg facilitet
+      </option>
+      {facilities.map((facility) => (
+        <option key={facility.id} value={facility.id}>
+          {facility.name}
+        </option>
+      ))}
+    </select>
+  )
+}
 
 function RouteComponent() {
   const navigate = useNavigate()
@@ -44,9 +73,11 @@ function RouteComponent() {
 
   const [members, setMembers] = useState<Array<Member>>([])
   const [invitations, setInvitations] = useState<Array<Invitation>>([])
+  const [facilities, setFacilities] = useState<Array<Facility>>([])
   const [error, setError] = useState<string | null>(null)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<OrgRole>('citizen')
+  const [inviteFacilityId, setInviteFacilityId] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   async function reload() {
@@ -70,20 +101,29 @@ function RouteComponent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organization?.id])
 
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/facilities`, { credentials: 'include' })
+      .then((response) => (response.ok ? response.json() : []))
+      .then(setFacilities)
+  }, [organization?.id])
+
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault()
     if (!organization || !inviteEmail) return
+    if (inviteRole === 'citizen' && !inviteFacilityId) return
 
     const { error: inviteError } = await authClient.organization.inviteMember({
       organizationId: organization.id,
       email: inviteEmail,
       role: inviteRole,
+      ...(inviteRole === 'citizen' ? { facilityId: inviteFacilityId } : {}),
     })
     if (inviteError) {
       setError(inviteError.message ?? 'Kunne ikke oprette invitationen.')
       return
     }
     setInviteEmail('')
+    setInviteFacilityId('')
     await reload()
   }
 
@@ -231,6 +271,9 @@ function RouteComponent() {
               className="min-w-[220px] flex-1"
             />
             <RoleSelect value={inviteRole} onChange={setInviteRole} />
+            {inviteRole === 'citizen' && (
+              <FacilitySelect facilities={facilities} value={inviteFacilityId} onChange={setInviteFacilityId} />
+            )}
             <Button type="submit" variant="primary">
               Opret invitation
             </Button>

@@ -28,6 +28,16 @@ export const authClient = createAuthClient({
                 servicePartner,
                 systemAdmin,
             },
+            schema: {
+                invitation: {
+                    additionalFields: {
+                        facilityId: {
+                            type: "string",
+                            required: false,
+                        },
+                    },
+                },
+            },
         }),
 
         inferAdditionalFields({
