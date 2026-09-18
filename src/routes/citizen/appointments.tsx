@@ -1,11 +1,11 @@
 import { createFileRoute, Navigate } from '@tanstack/react-router'
-import { Alert, Button, Card, Chip, EmptyState, Spinner } from '@heroui/react'
+import { Alert, Card, Chip, EmptyState, Spinner } from '@heroui/react'
 import { CalendarDays, Check, MapPin, Video, type LucideIcon } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
 import { useAppointments, useCancelActivitySignup } from '../../lib/citizen/api'
 import { appointmentTypeLabel } from '../../lib/citizen/appointments'
+import { Button } from '../../lib/citizen/Button'
 import { formatDateLabel, formatTime, formatTimeRange } from '../../lib/citizen/format'
-import { largeButton } from '../../lib/citizen/styles'
 import type { AppointmentType, Appointment } from '#/models/appointment'
 
 export const Route = createFileRoute('/citizen/appointments')({
@@ -41,7 +41,7 @@ function Appointments() {
             <Alert.Description className="text-lg">{error.message}</Alert.Description>
           </Alert.Content>
         </Alert>
-        <Button variant="primary" className={`${largeButton} self-start`} onPress={() => refetch()}>
+        <Button variant="primary" size="lg" className="self-start" onPress={() => refetch()}>
           Prøv igen
         </Button>
       </div>

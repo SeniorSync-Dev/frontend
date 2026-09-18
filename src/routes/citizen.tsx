@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import { createFileRoute, Link, Navigate, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
-import { AlertDialog, Button, buttonVariants, Spinner } from '@heroui/react'
+import { AlertDialog, buttonVariants, Spinner } from '@heroui/react'
 import { ArrowLeft, LogOut, Phone } from 'lucide-react'
 import { authClient } from '../lib/auth-client'
-import { largeButton } from '../lib/citizen/styles'
+import { Button, citizenButtonClass } from '../lib/citizen/Button'
 
 export const Route = createFileRoute('/citizen')({
   component: CitizenLayout,
@@ -50,7 +50,7 @@ function CitizenLayout() {
       <header className="flex flex-none flex-wrap items-center gap-4 border-b border-border bg-surface px-4 py-3 sm:px-8">
         {title ? (
           <>
-            <Button variant="outline" className={`${largeButton} border-2`} onPress={() => navigate({ to: '/citizen' })}>
+            <Button variant="outline" size="lg" className="border-2" onPress={() => navigate({ to: '/citizen' })}>
               <ArrowLeft className="size-6" strokeWidth={2.5} aria-hidden />
               Tilbage
             </Button>
@@ -63,7 +63,7 @@ function CitizenLayout() {
         )}
 
         <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
-          <Button variant="ghost" className={largeButton} onPress={signOut}>
+          <Button variant="ghost" size="lg" onPress={signOut}>
             <LogOut className="size-6" aria-hidden />
             Log ud
           </Button>
@@ -91,7 +91,7 @@ function Frame({ children }: { children: ReactNode }) {
 function CallForHelp({ careHomeName }: { careHomeName?: string }) {
   return (
     <AlertDialog>
-      <Button variant="danger" className={largeButton}>
+      <Button variant="danger" size="lg">
         <Phone className="size-6" aria-hidden />
         Tilkald hjælp
       </Button>
@@ -117,8 +117,7 @@ function CallForHelp({ careHomeName }: { careHomeName?: string }) {
                 href="tel:112"
                 className={buttonVariants({
                   variant: 'danger',
-                  size: 'lg',
-                  className: `${largeButton} w-full no-underline hover:bg-danger-hover`,
+                  className: `${citizenButtonClass('lg')} w-full no-underline hover:bg-danger-hover`,
                 })}
               >
                 <Phone className="size-6" aria-hidden />
@@ -132,7 +131,7 @@ function CallForHelp({ careHomeName }: { careHomeName?: string }) {
             </AlertDialog.Body>
 
             <AlertDialog.Footer>
-              <Button slot="close" variant="outline" className={`${largeButton} w-full sm:w-auto`}>
+              <Button slot="close" variant="outline" size="lg" className="w-full sm:w-auto">
                 Luk
               </Button>
             </AlertDialog.Footer>

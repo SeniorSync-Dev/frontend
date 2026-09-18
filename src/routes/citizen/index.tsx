@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate, type LinkProps } from '@tanstack/react-router'
-import { Alert, Button, Card, Spinner } from '@heroui/react'
+import { Alert, Card, Spinner } from '@heroui/react'
 import { CalendarDays, Check, ChevronRight, Clock, MapPin, Phone, Users, Video, type LucideIcon } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
 import { useAppointments } from '../../lib/citizen/api'
 import { nextAppointment, nextAppointmentHeading } from '../../lib/citizen/appointments'
 import { firstName, formatLongDate, formatRelativeDay, formatTimeRange, greeting } from '../../lib/citizen/format'
-import { xlButton } from '../../lib/citizen/styles'
+import { Button } from '../../lib/citizen/Button'
 import type { AppointmentType, Appointment } from '#/models/appointment'
 
 export const Route = createFileRoute('/citizen/')({
@@ -99,7 +99,7 @@ function SeeAppointmentsButton() {
   const navigate = useNavigate()
 
   return (
-    <Button variant="primary" fullWidth className={xlButton} onPress={() => navigate({ to: '/citizen/appointments' })}>
+    <Button variant="primary" size="xl" fullWidth onPress={() => navigate({ to: '/citizen/appointments' })}>
       Se mine aftaler
       <ChevronRight className="size-6" strokeWidth={2.5} aria-hidden />
     </Button>

@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { createFileRoute, Navigate, useNavigate } from '@tanstack/react-router'
-import { Alert, Button, Card, Chip, EmptyState, Spinner } from '@heroui/react'
+import { Alert, Card, Chip, EmptyState, Spinner } from '@heroui/react'
 import { Check, Users } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
 import { useActivities, useCancelActivitySignup, useSignUpForActivity } from '../../lib/citizen/api'
+import { Button } from '../../lib/citizen/Button'
 import { formatDayNumber, formatLongDate, formatShortWeekday, formatTime, formatTimeRange } from '../../lib/citizen/format'
-import { largeButton, xlButton } from '../../lib/citizen/styles'
 import type { Activity } from '#/models/activity'
 
 export const Route = createFileRoute('/citizen/activities')({
@@ -61,7 +61,7 @@ function Activities() {
           )}
         </p>
 
-        <Button variant="primary" className={`${xlButton} px-11`} onPress={() => navigate({ to: '/citizen' })}>
+        <Button variant="primary" size="xl" className="px-11" onPress={() => navigate({ to: '/citizen' })}>
           Tilbage til forsiden
         </Button>
       </div>
@@ -78,7 +78,7 @@ function Activities() {
             <Alert.Description className="text-lg">{error.message}</Alert.Description>
           </Alert.Content>
         </Alert>
-        <Button variant="primary" className={`${largeButton} self-start`} onPress={() => refetch()}>
+        <Button variant="primary" size="lg" className="self-start" onPress={() => refetch()}>
           Prøv igen
         </Button>
       </div>
@@ -189,7 +189,8 @@ function ActivityCard({
       ) : (
         <Button
           variant="primary"
-          className={`${largeButton} flex-none px-8`}
+          size="lg"
+          className="flex-none px-8"
           isPending={isBusy}
           isDisabled={isFull}
           onPress={() => onSignUp(activity)}
