@@ -10,13 +10,66 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CitizenRouteImport } from './routes/citizen'
+import { Route as AdminActivitiesRouteImport } from './routes/admin/activities'
+import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
+import { Route as AdminFacilitiesRouteImport } from './routes/admin/facilities'
+import { Route as AdminKioskPageRouteImport } from './routes/admin/kioskPage'
+import { Route as AdminSigninRouteImport } from './routes/admin/signin'
+import { Route as AdminVisitsRouteImport } from './routes/admin/visits'
 import { Route as AuthProfileRouteImport } from './routes/auth/profile'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
+import { Route as CitizenIndexRouteImport } from './routes/citizen/index'
+import { Route as CitizenActivitiesRouteImport } from './routes/citizen/activities'
+import { Route as CitizenAppointmentsRouteImport } from './routes/citizen/appointments'
+import { Route as ServicePartnerSigninRouteImport } from './routes/servicePartner/signin'
+import { Route as AuthAcceptInvitationInvitationIdRouteImport } from './routes/auth/accept-invitation.$invitationId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CitizenRoute = CitizenRouteImport.update({
+  id: '/citizen',
+  path: '/citizen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminActivitiesRoute = AdminActivitiesRouteImport.update({
+  id: '/activities',
+  path: '/activities',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFacilitiesRoute = AdminFacilitiesRouteImport.update({
+  id: '/facilities',
+  path: '/facilities',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminKioskPageRoute = AdminKioskPageRouteImport.update({
+  id: '/kioskPage',
+  path: '/kioskPage',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSigninRoute = AdminSigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminVisitsRoute = AdminVisitsRouteImport.update({
+  id: '/visits',
+  path: '/visits',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthProfileRoute = AuthProfileRouteImport.update({
   id: '/auth/profile',
@@ -28,35 +81,151 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
   path: '/auth/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CitizenIndexRoute = CitizenIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CitizenRoute,
+} as any)
+const CitizenActivitiesRoute = CitizenActivitiesRouteImport.update({
+  id: '/activities',
+  path: '/activities',
+  getParentRoute: () => CitizenRoute,
+} as any)
+const CitizenAppointmentsRoute = CitizenAppointmentsRouteImport.update({
+  id: '/appointments',
+  path: '/appointments',
+  getParentRoute: () => CitizenRoute,
+} as any)
+const ServicePartnerSigninRoute = ServicePartnerSigninRouteImport.update({
+  id: '/servicePartner/signin',
+  path: '/servicePartner/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthAcceptInvitationInvitationIdRoute =
+  AuthAcceptInvitationInvitationIdRouteImport.update({
+    id: '/auth/accept-invitation/$invitationId',
+    path: '/auth/accept-invitation/$invitationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/citizen': typeof CitizenRouteWithChildren
+  '/admin/activities': typeof AdminActivitiesRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/facilities': typeof AdminFacilitiesRoute
+  '/admin/kioskPage': typeof AdminKioskPageRoute
+  '/admin/signin': typeof AdminSigninRoute
+  '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/citizen/activities': typeof CitizenActivitiesRoute
+  '/citizen/appointments': typeof CitizenAppointmentsRoute
+  '/servicePartner/signin': typeof ServicePartnerSigninRoute
+  '/citizen/': typeof CitizenIndexRoute
+  '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/admin/activities': typeof AdminActivitiesRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/facilities': typeof AdminFacilitiesRoute
+  '/admin/kioskPage': typeof AdminKioskPageRoute
+  '/admin/signin': typeof AdminSigninRoute
+  '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/citizen/activities': typeof CitizenActivitiesRoute
+  '/citizen/appointments': typeof CitizenAppointmentsRoute
+  '/servicePartner/signin': typeof ServicePartnerSigninRoute
+  '/citizen': typeof CitizenIndexRoute
+  '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/citizen': typeof CitizenRouteWithChildren
+  '/admin/activities': typeof AdminActivitiesRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/facilities': typeof AdminFacilitiesRoute
+  '/admin/kioskPage': typeof AdminKioskPageRoute
+  '/admin/signin': typeof AdminSigninRoute
+  '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/citizen/activities': typeof CitizenActivitiesRoute
+  '/citizen/appointments': typeof CitizenAppointmentsRoute
+  '/servicePartner/signin': typeof ServicePartnerSigninRoute
+  '/citizen/': typeof CitizenIndexRoute
+  '/auth/accept-invitation/$invitationId': typeof AuthAcceptInvitationInvitationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth/profile' | '/auth/signin'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/citizen'
+    | '/admin/activities'
+    | '/admin/dashboard'
+    | '/admin/facilities'
+    | '/admin/kioskPage'
+    | '/admin/signin'
+    | '/admin/visits'
+    | '/auth/profile'
+    | '/auth/signin'
+    | '/citizen/activities'
+    | '/citizen/appointments'
+    | '/servicePartner/signin'
+    | '/citizen/'
+    | '/auth/accept-invitation/$invitationId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/profile' | '/auth/signin'
-  id: '__root__' | '/' | '/auth/profile' | '/auth/signin'
+  to:
+    | '/'
+    | '/admin'
+    | '/admin/activities'
+    | '/admin/dashboard'
+    | '/admin/facilities'
+    | '/admin/kioskPage'
+    | '/admin/signin'
+    | '/admin/visits'
+    | '/auth/profile'
+    | '/auth/signin'
+    | '/citizen/activities'
+    | '/citizen/appointments'
+    | '/servicePartner/signin'
+    | '/citizen'
+    | '/auth/accept-invitation/$invitationId'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/citizen'
+    | '/admin/activities'
+    | '/admin/dashboard'
+    | '/admin/facilities'
+    | '/admin/kioskPage'
+    | '/admin/signin'
+    | '/admin/visits'
+    | '/auth/profile'
+    | '/auth/signin'
+    | '/citizen/activities'
+    | '/citizen/appointments'
+    | '/servicePartner/signin'
+    | '/citizen/'
+    | '/auth/accept-invitation/$invitationId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  CitizenRoute: typeof CitizenRouteWithChildren
   AuthProfileRoute: typeof AuthProfileRoute
   AuthSigninRoute: typeof AuthSigninRoute
+  ServicePartnerSigninRoute: typeof ServicePartnerSigninRoute
+  AuthAcceptInvitationInvitationIdRoute: typeof AuthAcceptInvitationInvitationIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -67,6 +236,62 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/citizen': {
+      id: '/citizen'
+      path: '/citizen'
+      fullPath: '/citizen'
+      preLoaderRoute: typeof CitizenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/activities': {
+      id: '/admin/activities'
+      path: '/activities'
+      fullPath: '/admin/activities'
+      preLoaderRoute: typeof AdminActivitiesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/facilities': {
+      id: '/admin/facilities'
+      path: '/facilities'
+      fullPath: '/admin/facilities'
+      preLoaderRoute: typeof AdminFacilitiesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/kioskPage': {
+      id: '/admin/kioskPage'
+      path: '/kioskPage'
+      fullPath: '/admin/kioskPage'
+      preLoaderRoute: typeof AdminKioskPageRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/signin': {
+      id: '/admin/signin'
+      path: '/signin'
+      fullPath: '/admin/signin'
+      preLoaderRoute: typeof AdminSigninRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/visits': {
+      id: '/admin/visits'
+      path: '/visits'
+      fullPath: '/admin/visits'
+      preLoaderRoute: typeof AdminVisitsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/auth/profile': {
       id: '/auth/profile'
@@ -82,13 +307,87 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/citizen/': {
+      id: '/citizen/'
+      path: '/'
+      fullPath: '/citizen/'
+      preLoaderRoute: typeof CitizenIndexRouteImport
+      parentRoute: typeof CitizenRoute
+    }
+    '/citizen/activities': {
+      id: '/citizen/activities'
+      path: '/activities'
+      fullPath: '/citizen/activities'
+      preLoaderRoute: typeof CitizenActivitiesRouteImport
+      parentRoute: typeof CitizenRoute
+    }
+    '/citizen/appointments': {
+      id: '/citizen/appointments'
+      path: '/appointments'
+      fullPath: '/citizen/appointments'
+      preLoaderRoute: typeof CitizenAppointmentsRouteImport
+      parentRoute: typeof CitizenRoute
+    }
+    '/servicePartner/signin': {
+      id: '/servicePartner/signin'
+      path: '/servicePartner/signin'
+      fullPath: '/servicePartner/signin'
+      preLoaderRoute: typeof ServicePartnerSigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/accept-invitation/$invitationId': {
+      id: '/auth/accept-invitation/$invitationId'
+      path: '/auth/accept-invitation/$invitationId'
+      fullPath: '/auth/accept-invitation/$invitationId'
+      preLoaderRoute: typeof AuthAcceptInvitationInvitationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminActivitiesRoute: typeof AdminActivitiesRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminFacilitiesRoute: typeof AdminFacilitiesRoute
+  AdminKioskPageRoute: typeof AdminKioskPageRoute
+  AdminSigninRoute: typeof AdminSigninRoute
+  AdminVisitsRoute: typeof AdminVisitsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminActivitiesRoute: AdminActivitiesRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminFacilitiesRoute: AdminFacilitiesRoute,
+  AdminKioskPageRoute: AdminKioskPageRoute,
+  AdminSigninRoute: AdminSigninRoute,
+  AdminVisitsRoute: AdminVisitsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface CitizenRouteChildren {
+  CitizenActivitiesRoute: typeof CitizenActivitiesRoute
+  CitizenAppointmentsRoute: typeof CitizenAppointmentsRoute
+  CitizenIndexRoute: typeof CitizenIndexRoute
+}
+
+const CitizenRouteChildren: CitizenRouteChildren = {
+  CitizenActivitiesRoute: CitizenActivitiesRoute,
+  CitizenAppointmentsRoute: CitizenAppointmentsRoute,
+  CitizenIndexRoute: CitizenIndexRoute,
+}
+
+const CitizenRouteWithChildren =
+  CitizenRoute._addFileChildren(CitizenRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  CitizenRoute: CitizenRouteWithChildren,
   AuthProfileRoute: AuthProfileRoute,
   AuthSigninRoute: AuthSigninRoute,
+  ServicePartnerSigninRoute: ServicePartnerSigninRoute,
+  AuthAcceptInvitationInvitationIdRoute: AuthAcceptInvitationInvitationIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Alert, Avatar, Button, Card, Chip, Spinner } from '@heroui/react'
+import { Alert, Avatar, Button, Card, Spinner } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
 import { getInitials } from '../../lib/initials'
 
@@ -87,11 +87,6 @@ function Profile() {
             <Card.Title className="text-xl">{user.name}</Card.Title>
             <Card.Description>{user.email}</Card.Description>
           </div>
-          {user.role && (
-            <Chip variant="soft" color="accent" size="sm" className="ml-auto">
-              <Chip.Label className="capitalize">{user.role}</Chip.Label>
-            </Chip>
-          )}
         </Card.Header>
 
         <Card.Content>
