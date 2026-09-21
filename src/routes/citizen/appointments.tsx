@@ -5,7 +5,7 @@ import { authClient } from '../../lib/auth-client'
 import { useAppointments, useCancelActivitySignup } from '../../lib/citizen/api'
 import { appointmentTypeLabel } from '../../lib/citizen/appointments'
 import { Button } from '../../lib/citizen/Button'
-import { formatDateLabel, formatTime, formatTimeRange } from '../../lib/citizen/format'
+import { formatDateLabel, formatTime, formatTimeRange } from '../../lib/format'
 import type { AppointmentType, Appointment } from '#/models/appointment'
 
 export const Route = createFileRoute('/citizen/appointments')({

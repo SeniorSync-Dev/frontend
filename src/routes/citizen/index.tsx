@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate, type LinkProps } from '@tanstack/react-router'
 import { Alert, Card, Spinner } from '@heroui/react'
-import { CalendarDays, Check, ChevronRight, Clock, MapPin, Phone, Users, Video, type LucideIcon } from 'lucide-react'
+import { CalendarDays, Check, ChevronRight, Clock, MapPin, Phone, UserRound, Users, Video, type LucideIcon } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
 import { useAppointments } from '../../lib/citizen/api'
 import { nextAppointment, nextAppointmentHeading } from '../../lib/citizen/appointments'
-import { firstName, formatLongDate, formatRelativeDay, formatTimeRange, greeting } from '../../lib/citizen/format'
+import { firstName, formatLongDate, formatRelativeDay, formatTimeRange, greeting } from '../../lib/format'
 import { Button } from '../../lib/citizen/Button'
 import type { AppointmentType, Appointment } from '#/models/appointment'
 
@@ -85,12 +85,15 @@ function CitizenHome() {
         </Card.Footer>
       </Card>
 
-      <NavigationCard
-        to="/citizen/activities"
-        icon={Users}
-        title="Aktiviteter"
-        description="Se og tilmeld dig aktiviteter"
-      />
+      <div className="grid gap-6 md:grid-cols-2">
+        <NavigationCard
+          to="/citizen/activities"
+          icon={Users}
+          title="Aktiviteter"
+          description="Se og tilmeld dig aktiviteter"
+        />
+        <NavigationCard to="/citizen/relatives" icon={UserRound} title="Relatives" description="Manage who has access" />
+      </div>
     </>
   )
 }

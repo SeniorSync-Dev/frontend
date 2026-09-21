@@ -5,7 +5,7 @@ import { Check, Users } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
 import { useActivities, useCancelActivitySignup, useSignUpForActivity } from '../../lib/citizen/api'
 import { Button } from '../../lib/citizen/Button'
-import { formatDayNumber, formatLongDate, formatShortWeekday, formatTime, formatTimeRange } from '../../lib/citizen/format'
+import { formatDayNumber, formatLongDate, formatShortWeekday, formatTime, formatTimeRange } from '../../lib/format'
 import type { Activity } from '#/models/activity'
 
 export const Route = createFileRoute('/citizen/activities')({

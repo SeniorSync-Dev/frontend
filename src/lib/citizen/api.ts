@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiRequest, POLL_INTERVAL_MS } from '../api'
 import type { Appointment } from '#/models/appointment'
 import type { Activity } from '#/models/activity'
+import type { InviteCode, LinkedRelative } from '#/models/relative'
 
 // The backend sends dates as ISO strings (JSON has no Date type) so these Model types are raw strings before we parse start/end into Dates
 type AppointmentViewModel = Omit<Appointment, 'start' | 'end'> & { start: string; end?: string }
@@ -64,5 +65,57 @@ export function useCancelActivitySignup() {
       queryClient.invalidateQueries({ queryKey: ['citizen', 'activities'] })
       queryClient.invalidateQueries({ queryKey: ['citizen', 'appointments'] })
     },
+  })
+}
+
+type InviteCodeViewModel = Omit<InviteCode, 'expiresAt'> & { expiresAt: string }
+
+function parseInviteCode(dto: InviteCodeViewModel): InviteCode {
+  return { ...dto, expiresAt: new Date(dto.expiresAt) }
+}
+
+export function useLinkedRelatives() {
+  return useQuery({
+    queryKey: ['citizen', 'relatives'],
+    queryFn: () => apiRequest<LinkedRelative[]>('/citizen/relatives'),
+    refetchInterval: POLL_INTERVAL_MS,
+  })
+}
+
+export function useInviteCode() {
+  return useQuery({
+    queryKey: ['citizen', 'invite-code'],
+    queryFn: async () => {
+      const dto = await apiRequest<InviteCodeViewModel | null>('/citizen/invite-code')
+      return dto ? parseInviteCode(dto) : null
+    },
+  })
+}
+
+export function useGenerateInviteCode() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => apiRequest<InviteCodeViewModel>('/citizen/invite-code', { method: 'POST' }).then(parseInviteCode),
+    onSuccess: (inviteCode) => queryClient.setQueryData(['citizen', 'invite-code'], inviteCode),
+  })
+}
+
+export function useApproveRelative() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (relativeUserId: string) =>
+      apiRequest(`/citizen/relatives/${relativeUserId}/approve`, { method: 'PATCH' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['citizen', 'relatives'] }),
+  })
+}
+
+export function useRejectRelative() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (relativeUserId: string) => apiRequest(`/citizen/relatives/${relativeUserId}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['citizen', 'relatives'] }),
   })
 }
