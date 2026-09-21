@@ -1,0 +1,16 @@
+export interface Sensor {
+    id: string,
+    serialNumber: string,
+    type: string,
+    model: string,
+    manufacturer: string,
+    mqttTopic: string,
+    status: string,
+    batteryLevel: number,
+    lastSeenAt: Date,
+    locationDescription: string,
+    citizenUserId: string,
+    citizenName: string,
+    createdAt: Date,
+    updatedAt: Date,
+}
