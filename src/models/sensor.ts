@@ -14,3 +14,18 @@ export interface Sensor {
     createdAt: Date,
     updatedAt: Date,
 }
+
+export type SensorAssignment = "assigned" | "unassigned";
+export type SensorStatus = "active" | "offline";
+
+export interface SensorPagination {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+}
+
+export interface SensorsResponse {
+    sensors: Sensor[];
+    pagination: SensorPagination;
+}

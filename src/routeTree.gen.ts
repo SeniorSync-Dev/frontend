@@ -16,6 +16,7 @@ import { Route as AdminActivitiesRouteImport } from './routes/admin/activities'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminFacilitiesRouteImport } from './routes/admin/facilities'
 import { Route as AdminKioskPageRouteImport } from './routes/admin/kioskPage'
+import { Route as AdminSensorsRouteImport } from './routes/admin/sensors'
 import { Route as AdminSigninRouteImport } from './routes/admin/signin'
 import { Route as AdminVisitsRouteImport } from './routes/admin/visits'
 import { Route as AuthProfileRouteImport } from './routes/auth/profile'
@@ -59,6 +60,11 @@ const AdminFacilitiesRoute = AdminFacilitiesRouteImport.update({
 const AdminKioskPageRoute = AdminKioskPageRouteImport.update({
   id: '/kioskPage',
   path: '/kioskPage',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSensorsRoute = AdminSensorsRouteImport.update({
+  id: '/sensors',
+  path: '/sensors',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSigninRoute = AdminSigninRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/facilities': typeof AdminFacilitiesRoute
   '/admin/kioskPage': typeof AdminKioskPageRoute
+  '/admin/sensors': typeof AdminSensorsRoute
   '/admin/signin': typeof AdminSigninRoute
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/facilities': typeof AdminFacilitiesRoute
   '/admin/kioskPage': typeof AdminKioskPageRoute
+  '/admin/sensors': typeof AdminSensorsRoute
   '/admin/signin': typeof AdminSigninRoute
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/facilities': typeof AdminFacilitiesRoute
   '/admin/kioskPage': typeof AdminKioskPageRoute
+  '/admin/sensors': typeof AdminSensorsRoute
   '/admin/signin': typeof AdminSigninRoute
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/facilities'
     | '/admin/kioskPage'
+    | '/admin/sensors'
     | '/admin/signin'
     | '/admin/visits'
     | '/auth/profile'
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/facilities'
     | '/admin/kioskPage'
+    | '/admin/sensors'
     | '/admin/signin'
     | '/admin/visits'
     | '/auth/profile'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/facilities'
     | '/admin/kioskPage'
+    | '/admin/sensors'
     | '/admin/signin'
     | '/admin/visits'
     | '/auth/profile'
@@ -277,6 +289,13 @@ declare module '@tanstack/react-router' {
       path: '/kioskPage'
       fullPath: '/admin/kioskPage'
       preLoaderRoute: typeof AdminKioskPageRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/sensors': {
+      id: '/admin/sensors'
+      path: '/sensors'
+      fullPath: '/admin/sensors'
+      preLoaderRoute: typeof AdminSensorsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/signin': {
@@ -350,6 +369,7 @@ interface AdminRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminFacilitiesRoute: typeof AdminFacilitiesRoute
   AdminKioskPageRoute: typeof AdminKioskPageRoute
+  AdminSensorsRoute: typeof AdminSensorsRoute
   AdminSigninRoute: typeof AdminSigninRoute
   AdminVisitsRoute: typeof AdminVisitsRoute
 }
@@ -359,6 +379,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminFacilitiesRoute: AdminFacilitiesRoute,
   AdminKioskPageRoute: AdminKioskPageRoute,
+  AdminSensorsRoute: AdminSensorsRoute,
   AdminSigninRoute: AdminSigninRoute,
   AdminVisitsRoute: AdminVisitsRoute,
 }
