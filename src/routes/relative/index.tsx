@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Alert, Avatar, Button, buttonVariants, Card, EmptyState, Spinner } from '@heroui/react'
+import { Alert, Avatar, Button, Card, EmptyState, Spinner } from '@heroui/react'
 import { CalendarDays, ChevronRight, Users } from 'lucide-react'
 import { useLinkedCitizens } from '../../lib/relative/api'
-import { formatRelativeDateTime } from '../../lib/relative/format'
+import { AddCitizenModal } from '../../lib/relative/AddCitizenModal'
+import { formatRelativeDateTime } from '../../lib/format'
 import { getInitials } from '../../lib/initials'
 import type { LinkedCitizen } from '#/models/relative'
 
@@ -16,7 +17,7 @@ function RelativeHome() {
   if (!citizens && !error) {
     return (
       <div className="flex flex-1 items-center justify-center py-24">
-        <Spinner size="lg" color="accent" aria-label="Loading your citizens" />
+        <Spinner size="lg" color="accent" aria-label="Henter dine pårørende" />
       </div>
     )
   }
@@ -27,12 +28,12 @@ function RelativeHome() {
         <Alert status="danger">
           <Alert.Indicator />
           <Alert.Content>
-            <Alert.Title>We couldn't load your citizens</Alert.Title>
+            <Alert.Title>Vi kunne ikke hente dine pårørende</Alert.Title>
             <Alert.Description>{error.message}</Alert.Description>
           </Alert.Content>
         </Alert>
         <Button variant="primary" className="self-start" onPress={() => refetch()}>
-          Try again
+          Prøv igen
         </Button>
       </div>
     )
@@ -47,16 +48,14 @@ function RelativeHome() {
           <Users className="size-8" aria-hidden />
         </span>
         <div>
-          <p className="text-xl font-bold text-foreground">You're not linked to any citizens yet</p>
+          <p className="text-xl font-bold text-foreground">Du er endnu ikke tilknyttet nogen borgere</p>
           <p className="mt-2 max-w-sm text-sm text-muted">
-            You'll get an invitation code from the care home or from the citizen themself. The code lets you see
-            their calendar and sign up for activities.
+            Du får en invitationskode fra plejecentret eller fra borgeren selv. Med koden kan du se kalender og
+            tilmelde til aktiviteter.
           </p>
         </div>
-        <Link to="/relative/add-citizen" className={buttonVariants({ variant: 'primary' })}>
-          Add citizen
-        </Link>
-        <p className="text-sm text-muted">Don't have a code? Call the municipality on 74 42 00 00.</p>
+        <AddCitizenModal />
+        <p className="text-sm text-muted">Har du ikke en kode? Ring til kommunen på 74 42 00 00.</p>
       </EmptyState>
     )
   }
@@ -64,15 +63,15 @@ function RelativeHome() {
   return (
     <div className="flex flex-col gap-5 py-2">
       <div>
-        <h1 className="text-xl font-bold">My citizens</h1>
-        <p className="text-sm text-muted">You're linked to {linked.length} citizens</p>
+        <h1 className="text-xl font-bold">Mine pårørende</h1>
+        <p className="text-sm text-muted">Du er tilknyttet {linked.length} borgere</p>
       </div>
 
       <Alert status="accent">
         <Alert.Indicator />
         <Alert.Content>
           <Alert.Description className="text-sm">
-            You only see the calendar and activities — not health information.
+            Du ser kun kalender og aktiviteter
           </Alert.Description>
         </Alert.Content>
       </Alert>
@@ -83,12 +82,10 @@ function RelativeHome() {
         ))}
       </div>
 
-      <Link to="/relative/add-citizen" className={buttonVariants({ variant: 'outline' })}>
-        Add citizen
-      </Link>
+      <AddCitizenModal trigger={(open) => <Button variant="outline" onPress={open}>Tilføj borger</Button>} />
 
       <p className="text-sm text-muted">
-        Missing access to someone? Contact the care home or the municipality on 74 42 00 00.
+        Mangler du adgang til en pårørende? Kontakt plejecentret eller kommunen på 74 42 00 00.
       </p>
     </div>
   )
@@ -103,7 +100,7 @@ function CitizenCard({ citizen }: { citizen: LinkedCitizen }) {
         </Avatar>
         <Card.Content className="min-w-0 gap-0.5">
           <Card.Title className="text-base">{citizen.name}</Card.Title>
-          <Card.Description className="text-sm">Request awaiting approval</Card.Description>
+          <Card.Description className="text-sm">Anmodning afventer godkendelse</Card.Description>
         </Card.Content>
       </Card>
     )
@@ -119,7 +116,7 @@ function CitizenCard({ citizen }: { citizen: LinkedCitizen }) {
           <Card.Title className="text-base">{citizen.name}</Card.Title>
           <Card.Description className="text-sm">
             {citizen.relationshipType}
-            {citizen.age !== undefined ? ` · ${citizen.age} years` : ''}
+            {citizen.age !== undefined ? ` · ${citizen.age} år` : ''}
           </Card.Description>
           <Card.Description className="text-sm">{citizen.facilityName}</Card.Description>
           {citizen.nextAppointmentStart && (

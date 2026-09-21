@@ -25,7 +25,7 @@ function Relatives() {
       <InviteCodeCard />
 
       <div>
-        <h2 className="text-2xl font-bold">My relatives</h2>
+        <h2 className="text-2xl font-bold">Mine pårørende</h2>
       </div>
 
       {(approveMutation.error || rejectMutation.error) && (
@@ -43,7 +43,7 @@ function Relatives() {
         <Alert status="danger">
           <Alert.Indicator />
           <Alert.Content>
-            <Alert.Title className="text-xl">We couldn't load your relatives</Alert.Title>
+            <Alert.Title className="text-xl">Vi kunne ikke hente dine pårørende</Alert.Title>
             <Alert.Description className="text-lg">{error.message}</Alert.Description>
           </Alert.Content>
         </Alert>
@@ -51,12 +51,12 @@ function Relatives() {
 
       {!relatives && !error && (
         <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" color="accent" aria-label="Loading relatives" />
+          <Spinner size="lg" color="accent" aria-label="Henter pårørende" />
         </div>
       )}
 
       {relatives && relatives.length === 0 && (
-        <p className="text-xl text-muted">No one has requested access yet.</p>
+        <p className="text-xl text-muted">Ingen har anmodet om adgang endnu.</p>
       )}
 
       {relatives && relatives.length > 0 && (
@@ -101,27 +101,17 @@ function RelativeCard({
         <div className="flex flex-none gap-2">
           <Button variant="primary" size="lg" isPending={isBusy} onPress={onApprove}>
             <Check className="size-5" aria-hidden />
-            Approve
+            Godkend
           </Button>
           <Button variant="outline" size="lg" isPending={isBusy} onPress={onReject}>
             <X className="size-5" aria-hidden />
-            Decline
+            Afvis
           </Button>
         </div>
       ) : (
-        <div className="flex flex-none flex-col items-end gap-2">
-          <Chip color="success" variant="soft">
-            <Chip.Label>Has access</Chip.Label>
-          </Chip>
-          <Button
-            variant="ghost"
-            className="text-lg font-semibold text-accent underline underline-offset-4"
-            isPending={isBusy}
-            onPress={onReject}
-          >
-            Remove access
-          </Button>
-        </div>
+        <Chip color="success" variant="soft">
+          <Chip.Label>Har adgang</Chip.Label>
+        </Chip>
       )}
     </Card>
   )
@@ -136,17 +126,17 @@ function InviteCodeCard() {
   return (
     <Card className="gap-4 p-6">
       <Card.Header>
-        <Card.Title className="text-xl font-bold">Invitation code</Card.Title>
+        <Card.Title className="text-xl font-bold">Invitationskode</Card.Title>
         <Card.Description className="text-lg">
-          Share this code with a relative so they can request access to your calendar and activities.
+          Del denne kode med en pårørende, så de kan anmode om adgang til din kalender og aktiviteter.
         </Card.Description>
       </Card.Header>
 
-      <Card.Content>
+      <Card.Content className="items-center text-center">
         {code ? (
           <p className="text-4xl font-extrabold tracking-[0.2em]">{code}</p>
         ) : (
-          !isPending && <p className="text-lg text-muted">You don't have an active code.</p>
+          !isPending && <p className="text-lg text-muted">Du har ingen aktiv kode.</p>
         )}
         {generateMutation.error && (
           <Alert status="danger">
@@ -160,7 +150,7 @@ function InviteCodeCard() {
 
       <Card.Footer>
         <Button variant="primary" size="lg" isPending={generateMutation.isPending} onPress={() => generateMutation.mutate()}>
-          {code ? 'Generate a new code' : 'Generate a code'}
+          {code ? 'Opret ny kode' : 'Opret en kode'}
         </Button>
       </Card.Footer>
     </Card>

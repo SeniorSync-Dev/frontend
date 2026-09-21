@@ -92,7 +92,7 @@ function CitizenHome() {
           title="Aktiviteter"
           description="Se og tilmeld dig aktiviteter"
         />
-        <NavigationCard to="/citizen/relatives" icon={UserRound} title="Relatives" description="Manage who has access" />
+        <NavigationCard to="/citizen/relatives" icon={UserRound} title="Pårørende" description="Se og administrer adgang" />
       </div>
     </>
   )

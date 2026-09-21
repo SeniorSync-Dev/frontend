@@ -27,7 +27,6 @@ import { Route as CitizenAppointmentsRouteImport } from './routes/citizen/appoin
 import { Route as CitizenRelativesRouteImport } from './routes/citizen/relatives'
 import { Route as RelativeIndexRouteImport } from './routes/relative/index'
 import { Route as RelativeCitizenIdRouteImport } from './routes/relative/$citizenId'
-import { Route as RelativeAddCitizenRouteImport } from './routes/relative/add-citizen'
 import { Route as ServicePartnerSigninRouteImport } from './routes/servicePartner/signin'
 import { Route as AuthAcceptInvitationInvitationIdRouteImport } from './routes/auth/accept-invitation.$invitationId'
 import { Route as RelativeCitizenIdIndexRouteImport } from './routes/relative/$citizenId/index'
@@ -124,11 +123,6 @@ const RelativeCitizenIdRoute = RelativeCitizenIdRouteImport.update({
   path: '/$citizenId',
   getParentRoute: () => RelativeRoute,
 } as any)
-const RelativeAddCitizenRoute = RelativeAddCitizenRouteImport.update({
-  id: '/add-citizen',
-  path: '/add-citizen',
-  getParentRoute: () => RelativeRoute,
-} as any)
 const ServicePartnerSigninRoute = ServicePartnerSigninRouteImport.update({
   id: '/servicePartner/signin',
   path: '/servicePartner/signin',
@@ -175,7 +169,6 @@ export interface FileRoutesByFullPath {
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/citizen/relatives': typeof CitizenRelativesRoute
   '/relative/$citizenId': typeof RelativeCitizenIdRouteWithChildren
-  '/relative/add-citizen': typeof RelativeAddCitizenRoute
   '/servicePartner/signin': typeof ServicePartnerSigninRoute
   '/citizen/': typeof CitizenIndexRoute
   '/relative/': typeof RelativeIndexRoute
@@ -198,7 +191,6 @@ export interface FileRoutesByTo {
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/citizen/relatives': typeof CitizenRelativesRoute
-  '/relative/add-citizen': typeof RelativeAddCitizenRoute
   '/servicePartner/signin': typeof ServicePartnerSigninRoute
   '/citizen': typeof CitizenIndexRoute
   '/relative': typeof RelativeIndexRoute
@@ -225,7 +217,6 @@ export interface FileRoutesById {
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/citizen/relatives': typeof CitizenRelativesRoute
   '/relative/$citizenId': typeof RelativeCitizenIdRouteWithChildren
-  '/relative/add-citizen': typeof RelativeAddCitizenRoute
   '/servicePartner/signin': typeof ServicePartnerSigninRoute
   '/citizen/': typeof CitizenIndexRoute
   '/relative/': typeof RelativeIndexRoute
@@ -253,7 +244,6 @@ export interface FileRouteTypes {
     | '/citizen/appointments'
     | '/citizen/relatives'
     | '/relative/$citizenId'
-    | '/relative/add-citizen'
     | '/servicePartner/signin'
     | '/citizen/'
     | '/relative/'
@@ -276,7 +266,6 @@ export interface FileRouteTypes {
     | '/citizen/activities'
     | '/citizen/appointments'
     | '/citizen/relatives'
-    | '/relative/add-citizen'
     | '/servicePartner/signin'
     | '/citizen'
     | '/relative'
@@ -302,7 +291,6 @@ export interface FileRouteTypes {
     | '/citizen/appointments'
     | '/citizen/relatives'
     | '/relative/$citizenId'
-    | '/relative/add-citizen'
     | '/servicePartner/signin'
     | '/citizen/'
     | '/relative/'
@@ -451,13 +439,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RelativeCitizenIdRouteImport
       parentRoute: typeof RelativeRoute
     }
-    '/relative/add-citizen': {
-      id: '/relative/add-citizen'
-      path: '/add-citizen'
-      fullPath: '/relative/add-citizen'
-      preLoaderRoute: typeof RelativeAddCitizenRouteImport
-      parentRoute: typeof RelativeRoute
-    }
     '/servicePartner/signin': {
       id: '/servicePartner/signin'
       path: '/servicePartner/signin'
@@ -550,13 +531,11 @@ const RelativeCitizenIdRouteWithChildren =
 
 interface RelativeRouteChildren {
   RelativeCitizenIdRoute: typeof RelativeCitizenIdRouteWithChildren
-  RelativeAddCitizenRoute: typeof RelativeAddCitizenRoute
   RelativeIndexRoute: typeof RelativeIndexRoute
 }
 
 const RelativeRouteChildren: RelativeRouteChildren = {
   RelativeCitizenIdRoute: RelativeCitizenIdRouteWithChildren,
-  RelativeAddCitizenRoute: RelativeAddCitizenRoute,
   RelativeIndexRoute: RelativeIndexRoute,
 }
 

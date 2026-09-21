@@ -32,6 +32,15 @@ export function useLinkedCitizens() {
   })
 }
 
+export function useRemoveCitizenLink(citizenId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => apiRequest(`/relative/citizens/${citizenId}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['relative', 'citizens'] }),
+  })
+}
+
 export function useCitizenAppointments(citizenId: string) {
   return useQuery({
     queryKey: ['relative', 'citizens', citizenId, 'appointments'],
@@ -80,6 +89,75 @@ export function useCancelCitizenActivitySignup(citizenId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['relative', 'citizens', citizenId, 'activities'] })
       queryClient.invalidateQueries({ queryKey: ['relative', 'citizens', citizenId, 'appointments'] })
+    },
+  })
+}
+
+export function useScheduleVisit(citizenId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: { title?: string; start: string; end: string; description?: string }) =>
+      apiRequest<AppointmentDto[]>(`/relative/citizens/${citizenId}/visits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      }).then((dtos) => dtos.map(parseAppointment)),
+    onSuccess: (appointments) => {
+      queryClient.setQueryData(['relative', 'citizens', citizenId, 'appointments'], appointments)
+    },
+  })
+}
+
+export function useUpdateVisit(citizenId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      visitId,
+      ...input
+    }: {
+      visitId: string
+      title?: string
+      start: string
+      end: string
+      description?: string
+    }) =>
+      apiRequest<AppointmentDto[]>(`/relative/citizens/${citizenId}/visits/${visitId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      }).then((dtos) => dtos.map(parseAppointment)),
+    onSuccess: (appointments) => {
+      queryClient.setQueryData(['relative', 'citizens', citizenId, 'appointments'], appointments)
+    },
+  })
+}
+
+export function useCompleteVisit(citizenId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (visitId: string) =>
+      apiRequest<AppointmentDto[]>(`/relative/citizens/${citizenId}/visits/${visitId}/complete`, {
+        method: 'PATCH',
+      }).then((dtos) => dtos.map(parseAppointment)),
+    onSuccess: (appointments) => {
+      queryClient.setQueryData(['relative', 'citizens', citizenId, 'appointments'], appointments)
+    },
+  })
+}
+
+export function useDeleteVisit(citizenId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (visitId: string) =>
+      apiRequest<AppointmentDto[]>(`/relative/citizens/${citizenId}/visits/${visitId}`, {
+        method: 'DELETE',
+      }).then((dtos) => dtos.map(parseAppointment)),
+    onSuccess: (appointments) => {
+      queryClient.setQueryData(['relative', 'citizens', citizenId, 'appointments'], appointments)
     },
   })
 }
