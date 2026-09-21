@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, EmptyState, Spinner } from '@heroui/react'
 import { Cpu, RefreshCw } from 'lucide-react'
-import { useSensors } from '../../lib/admin/sensor'
+import { useAssignSensor, useSensors, useUnassignSensor } from '../../lib/admin/sensor'
+import { useVisitOptions } from '../../lib/admin/visits'
 import type { SensorAssignment } from '../../models/sensor'
 
 export const Route = createFileRoute('/admin/sensors')({
@@ -14,11 +15,22 @@ const pageSize = 25
 function RouteComponent() {
   const [assignment, setAssignment] = useState<SensorAssignment | undefined>()
   const [page, setPage] = useState(1)
+  const [selectedCitizenIds, setSelectedCitizenIds] = useState<Record<string, string>>({})
   const { data, isPending, isError, refetch, isFetching } = useSensors({ assignment, page, pageSize })
+  const { data: visitOptions } = useVisitOptions()
+  const assignSensor = useAssignSensor()
+  const unassignSensor = useUnassignSensor()
+  const citizens = visitOptions?.citizens ?? []
 
   function changeAssignment(value: SensorAssignment | undefined) {
     setAssignment(value)
     setPage(1)
+  }
+
+  function assign(sensorId: string) {
+    const userId = selectedCitizenIds[sensorId]
+    if (!userId) return
+    assignSensor.mutate({ sensorId, citizenUserId: userId })
   }
 
   if (isPending) {
@@ -85,6 +97,16 @@ function RouteComponent() {
         </Alert>
       )}
 
+      {(assignSensor.isError || unassignSensor.isError) && (
+        <Alert status="danger">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>Sensorens tildeling kunne ikke ændres</Alert.Title>
+            <Alert.Description>Prøv igen om et øjeblik.</Alert.Description>
+          </Alert.Content>
+        </Alert>
+      )}
+
       {sensors.length === 0 ? (
         <EmptyState className="flex flex-col items-center gap-3 px-6 py-16 text-center">
           <span className="flex size-14 items-center justify-center rounded-full bg-accent-soft text-accent">
@@ -112,7 +134,46 @@ function RouteComponent() {
                     {[sensor.manufacturer, sensor.model, sensor.type, sensor.locationDescription].filter(Boolean).join(' · ')}
                   </p>
                 </div>
-                <p className="text-sm text-muted">{sensor.citizenName || 'Ikke tildelt'}</p>
+                {sensor.citizenUserId ? (
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm text-muted">{sensor.citizenName || 'Tildelt borger'}</p>
+                    <Button
+                      variant="danger-soft"
+                      size="sm"
+                      isPending={unassignSensor.isPending && unassignSensor.variables.sensorId === sensor.id}
+                      onPress={() => unassignSensor.mutate({ sensorId: sensor.id })}
+                    >
+                      Fjern tildeling
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <select
+                      aria-label={`Vælg borger til sensor ${sensor.serialNumber}`}
+                      className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+                      value={selectedCitizenIds[sensor.id] ?? ''}
+                      onChange={(event) =>
+                        setSelectedCitizenIds((current) => ({ ...current, [sensor.id]: event.target.value }))
+                      }
+                    >
+                      <option value="">Vælg borger</option>
+                      {citizens.map((citizen) => (
+                        <option key={citizen.userId} value={citizen.userId}>
+                          {citizen.name}
+                        </option>
+                      ))}
+                    </select>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      isDisabled={!selectedCitizenIds[sensor.id]}
+                      isPending={assignSensor.isPending && assignSensor.variables.sensorId === sensor.id}
+                      onPress={() => assign(sensor.id)}
+                    >
+                      Tildel
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </Card.Content>

@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "../api";
-import type { SensorAssignment, SensorsResponse, SensorStatus } from "../../models/sensor";
+import type { SensorAssignment, SensorsResponse, SensorStatus, Sensor } from "../../models/sensor";
 
 export type UseSensorsOptions = {
     assignment?: SensorAssignment;
@@ -24,6 +24,41 @@ export function useSensors(options: UseSensorsOptions = {}) {
 
             const query = searchParams.toString();
             return apiRequest<SensorsResponse>(`/sensors${query ? `?${query}` : ""}`);
+        },
+    });
+}
+
+export function useAssignSensor() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (input: { sensorId: string; citizenUserId: string }) =>
+            apiRequest<Sensor>(`/sensors/${input.sensorId}/assignment`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(input),
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["admin", "sensors"],
+            });
+        },
+    });
+}
+
+export function useUnassignSensor() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (input: { sensorId: string }) =>
+            apiRequest<Sensor>(`/sensors/${input.sensorId}/unassignment`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["admin", "sensors"],
+            });
         },
     });
 }
