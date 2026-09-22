@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { createFileRoute, Navigate } from '@tanstack/react-router'
-import { Alert, Card, Chip, EmptyState, Spinner } from '@heroui/react'
+import { Alert, Card, Chip, EmptyState, Input, Spinner, TextArea } from '@heroui/react'
 import { CalendarDays, Check, MapPin, Video, type LucideIcon } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
-import { useAppointments, useCancelActivitySignup } from '../../lib/citizen/api'
+import { useAppointments, useBookVisit, useCancelActivitySignup } from '../../lib/citizen/api'
 import { appointmentTypeLabel } from '../../lib/citizen/appointments'
 import { Button } from '../../lib/citizen/Button'
 import { formatDateLabel, formatTime, formatTimeRange } from '../../lib/citizen/format'
@@ -50,22 +51,10 @@ function Appointments() {
 
   const upcoming = appointments ?? []
 
-  if (upcoming.length === 0) {
-    return (
-      <EmptyState className="flex flex-col items-center gap-4 px-8 py-12 text-center">
-        <span className="flex size-21 items-center justify-center rounded-full bg-accent-soft text-accent">
-          <CalendarDays className="size-10" aria-hidden />
-        </span>
-        <p className="text-3xl font-bold text-foreground">Du har ingen kommende aftaler</p>
-        <p className="max-w-xl text-xl leading-relaxed text-muted">
-          Når dit plejehjem planlægger et besøg eller en aktivitet, kan du se det her.
-        </p>
-      </EmptyState>
-    )
-  }
-
   return (
     <>
+      <BookVisit />
+
       {cancelMutation.error && (
         <Alert status="danger">
           <Alert.Indicator />
@@ -76,19 +65,124 @@ function Appointments() {
         </Alert>
       )}
 
-      <p className="text-2xl text-muted">Her er dine næste aftaler - én ad gangen:</p>
-      {upcoming.map((appointment, index) => (
-        <AppointmentCard
-          key={appointment.id}
-          appointment={appointment}
-          highlighted={index === 0}
-          isCancelling={cancelMutation.isPending && cancelMutation.variables === appointment.id}
-          onCancel={() => cancelMutation.mutate(appointment.id)}
-        />
-      ))}
+      {upcoming.length === 0 ? (
+        <EmptyState className="flex flex-col items-center gap-4 px-8 py-12 text-center">
+          <span className="flex size-21 items-center justify-center rounded-full bg-accent-soft text-accent">
+            <CalendarDays className="size-10" aria-hidden />
+          </span>
+          <p className="text-3xl font-bold text-foreground">Du har ingen kommende aftaler</p>
+          <p className="max-w-xl text-xl leading-relaxed text-muted">
+            Når dit plejehjem planlægger et besøg eller en aktivitet, kan du se det her.
+          </p>
+        </EmptyState>
+      ) : (
+        <>
+          <p className="text-2xl text-muted">Her er dine næste aftaler - én ad gangen:</p>
+          {upcoming.map((appointment, index) => (
+            <AppointmentCard
+              key={appointment.id}
+              appointment={appointment}
+              highlighted={index === 0}
+              isCancelling={cancelMutation.isPending && cancelMutation.variables === appointment.id}
+              onCancel={() => cancelMutation.mutate(appointment.id)}
+            />
+          ))}
+        </>
+      )}
     </>
   )
 }
+
+function BookVisit() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [scheduledStart, setScheduledStart] = useState('')
+  const bookVisit = useBookVisit()
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!scheduledStart) return
+
+    bookVisit.mutate(
+      { title: title || undefined, description: description || undefined, scheduledStart },
+      {
+        onSuccess: () => {
+          setTitle('')
+          setDescription('')
+          setScheduledStart('')
+          setIsOpen(false)
+        },
+      },
+    )
+  }
+
+  if (!isOpen) {
+    return (
+      <Button variant="primary" size="xl" fullWidth onPress={() => setIsOpen(true)}>
+        <CalendarDays className="size-6" strokeWidth={2.5} aria-hidden />
+        Bestil et besøg
+      </Button>
+    )
+  }
+
+  return (
+    <Card className="gap-5 p-6 sm:p-7">
+      <Card.Header>
+        <Card.Title className="text-xl font-bold">Bestil et besøg</Card.Title>
+      </Card.Header>
+      <Card.Content>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {bookVisit.isError && (
+            <Alert status="danger">
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Title className="text-lg">Det lykkedes ikke</Alert.Title>
+                <Alert.Description className="text-base">{bookVisit.error.message}</Alert.Description>
+              </Alert.Content>
+            </Alert>
+          )}
+          <label className="flex flex-col gap-2 text-xl font-semibold">
+            Hvad handler besøget om? (valgfrit)
+            <Input
+              placeholder="F.eks. Hjælp til bad"
+              className="h-14 text-xl"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </label>
+          <label className="flex flex-col gap-2 text-xl font-semibold">
+            Hvornår passer det dig?
+            <Input
+              type="datetime-local"
+              required
+              className="h-14 text-xl"
+              value={scheduledStart}
+              onChange={(e) => setScheduledStart(e.target.value)}
+            />
+          </label>
+          <label className="flex flex-col gap-2 text-xl font-semibold">
+            Vil du fortælle lidt mere? (valgfrit)
+            <TextArea
+              className="text-xl"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </label>
+          <div className="flex flex-wrap gap-3">
+            <Button type="submit" variant="primary" size="xl" isPending={bookVisit.isPending}>
+              Send bestilling
+            </Button>
+            <Button type="button" variant="outline" size="xl" onPress={() => setIsOpen(false)}>
+              Annullér
+            </Button>
+          </div>
+        </form>
+      </Card.Content>
+    </Card>
+  )
+}
+
 
 const typeIcon: Record<AppointmentType, LucideIcon> = {
   screen_visit: Video,

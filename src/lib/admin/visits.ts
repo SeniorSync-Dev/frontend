@@ -39,3 +39,17 @@ export function useCreateVisit() {
         },
     });
 }
+
+export function useAssignVisit() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (visitId: string) =>
+            apiRequest<Visit>(`/api/visits/${visitId}/assign`, {
+                method: "POST",
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["admin", "visits"] });
+        },
+    });
+}
