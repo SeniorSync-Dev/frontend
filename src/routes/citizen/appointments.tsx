@@ -95,6 +95,7 @@ function Appointments() {
 
 function BookVisit() {
   const [isOpen, setIsOpen] = useState(false)
+  const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [scheduledStart, setScheduledStart] = useState('')
   const bookVisit = useBookVisit()
@@ -104,9 +105,10 @@ function BookVisit() {
     if (!scheduledStart) return
 
     bookVisit.mutate(
-      { description: description || undefined, scheduledStart },
+      { title: title || undefined, description: description || undefined, scheduledStart },
       {
         onSuccess: () => {
+          setTitle('')
           setDescription('')
           setScheduledStart('')
           setIsOpen(false)
@@ -141,6 +143,15 @@ function BookVisit() {
             </Alert>
           )}
           <label className="flex flex-col gap-2 text-xl font-semibold">
+            Hvad handler besøget om? (valgfrit)
+            <Input
+              placeholder="F.eks. Hjælp til bad"
+              className="h-14 text-xl"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </label>
+          <label className="flex flex-col gap-2 text-xl font-semibold">
             Hvornår passer det dig?
             <Input
               type="datetime-local"
@@ -151,7 +162,7 @@ function BookVisit() {
             />
           </label>
           <label className="flex flex-col gap-2 text-xl font-semibold">
-            Vil du fortælle lidt om, hvad besøget handler om? (valgfrit)
+            Vil du fortælle lidt mere? (valgfrit)
             <TextArea
               className="text-xl"
               value={description}
