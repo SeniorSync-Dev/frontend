@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, Input } from '@heroui/react'
-import { useCreateVisit, useVisitOptions, useVisits } from '../../lib/admin/visits'
+import { useAssignVisit, useCreateVisit, useVisitOptions, useVisits } from '../../lib/admin/visits'
 import { visitStatusLabels } from '../../models/visit'
 
 export const Route = createFileRoute('/admin/visits')({
@@ -37,6 +37,7 @@ function RouteComponent() {
   const citizens = options?.citizens ?? []
   const employees = options?.employees ?? []
   const createVisit = useCreateVisit()
+  const assignVisit = useAssignVisit()
 
   const [title, setTitle] = useState('')
   const [citizenUserId, setCitizenUserId] = useState('')
@@ -49,7 +50,9 @@ function RouteComponent() {
       ? 'Kunne ikke hente besøg.'
       : createVisit.isError
         ? 'Kunne ikke oprette besøget.'
-        : null
+        : assignVisit.isError
+          ? 'Kunne ikke tildele besøget.'
+          : null
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -180,6 +183,16 @@ function RouteComponent() {
                     {visit.citizenName} · {visit.employeeName ?? 'Ikke tildelt'}
                   </p>
                 </div>
+                {!visit.assignedEmployeeId && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    isPending={assignVisit.isPending && assignVisit.variables === visit.id}
+                    onPress={() => assignVisit.mutate(visit.id)}
+                  >
+                    Tildel mig
+                  </Button>
+                )}
               </div>
             ))
           )}
