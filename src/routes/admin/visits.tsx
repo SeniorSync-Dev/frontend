@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, Input } from '@heroui/react'
-import { useCreateVisit, useVisitOptions, useVisits } from '../../lib/admin/visits'
+import { useAssignVisit, useCreateVisit, useVisitOptions, useVisits } from '../../lib/admin/visits'
 import { visitStatusLabels } from '../../models/visit'
 
 export const Route = createFileRoute('/admin/visits')({
@@ -37,6 +37,7 @@ function RouteComponent() {
   const citizens = options?.citizens ?? []
   const employees = options?.employees ?? []
   const createVisit = useCreateVisit()
+  const assignVisit = useAssignVisit()
 
   const [title, setTitle] = useState('')
   const [citizenUserId, setCitizenUserId] = useState('')
@@ -49,7 +50,9 @@ function RouteComponent() {
       ? 'Kunne ikke hente besøg.'
       : createVisit.isError
         ? 'Kunne ikke oprette besøget.'
-        : null
+        : assignVisit.isError
+          ? 'Kunne ikke tildele besøget.'
+          : null
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -163,25 +166,59 @@ function RouteComponent() {
           {visits.length === 0 ? (
             <p className="text-sm text-muted">Ingen besøg endnu.</p>
           ) : (
-            visits.map((visit) => (
-              <div
-                key={visit.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-4 py-3"
-              >
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">{visit.title}</p>
-                    <Chip variant="soft" color="accent" size="sm">
-                      <Chip.Label>{visitStatusLabels[visit.status]}</Chip.Label>
-                    </Chip>
+            visits.map((visit) => {
+              const isUnassigned = !visit.assignedEmployeeId
+
+              return (
+                <div
+                  key={visit.id}
+                  className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border px-4 py-3"
+                >
+                  <div className="flex flex-col gap-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-medium">{visit.title}</p>
+                      <Chip variant="soft" color="accent" size="sm">
+                        <Chip.Label>{visitStatusLabels[visit.status]}</Chip.Label>
+                      </Chip>
+                      {isUnassigned && (
+                        <Chip variant="soft" color="warning" size="sm">
+                          <Chip.Label>Ikke tildelt</Chip.Label>
+                        </Chip>
+                      )}
+                    </div>
+
+                    <p className="text-sm text-muted">{formatRange(visit.scheduledStart, visit.scheduledEnd)}</p>
+
+                    {visit.description && (
+                      <p className="text-sm">
+                        <span className="text-muted">Besked fra borgeren: </span>
+                        <span className="font-semibold">{visit.description}</span>
+                      </p>
+                    )}
+
+                    <p className="text-sm">
+                      <span className="text-muted">Borger: </span>
+                      <span className="font-medium">{visit.citizenName}</span>
+                    </p>
+
+                    <p className="text-sm text-muted">
+                      Medarbejder: {visit.employeeName ?? 'Ikke tildelt'}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted">{formatRange(visit.scheduledStart, visit.scheduledEnd)}</p>
-                  <p className="text-sm text-muted">
-                    {visit.citizenName} · {visit.employeeName ?? 'Ikke tildelt'}
-                  </p>
+
+                  {isUnassigned && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      isPending={assignVisit.isPending && assignVisit.variables === visit.id}
+                      onPress={() => assignVisit.mutate(visit.id)}
+                    >
+                      Tildel mig
+                    </Button>
+                  )}
                 </div>
-              </div>
-            ))
+              )
+            })
           )}
         </Card.Content>
       </Card>
