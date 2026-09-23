@@ -95,7 +95,7 @@ function AdminLayout() {
             <nav aria-label="Service Partner" className="flex flex-col gap-1">
               <p className="px-3 pb-2 text-xs font-semibold tracking-wider text-muted uppercase">Service Partner</p>
               <Link to="/admin/activities" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
+                <SportShoe />
                 Service Partner
               </Link>
             </nav>
@@ -136,24 +136,5 @@ function AdminLayout() {
         <Outlet />
       </div>
     </div>
-  )
-}
-
-function DashboardIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-    </svg>
-  )
-}
-
-function AlarmIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 9v4m0 4h.01M10.3 3.5 2.2 18a2 2 0 0 0 1.75 3h16.1A2 2 0 0 0 21.8 18L13.7 3.5a2 2 0 0 0-3.4 0Z" />
-    </svg>
   )
 }

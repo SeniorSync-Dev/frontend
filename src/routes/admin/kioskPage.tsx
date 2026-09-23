@@ -59,9 +59,9 @@ function KioskPage() {
   const criticalEvents = useSensorEvents({ severity: 'critical', page: 1, pageSize, refetchInterval: refreshInterval })
   const emergencyEvents = useSensorEvents({ severity: 'emergency', page: 1, pageSize, refetchInterval: refreshInterval })
   const offlineSensors = useSensors({ assignment: 'assigned', status: 'offline', page: 1, pageSize, refetchInterval: refreshInterval })
-  const events = [...(emergencyEvents.data?.sensorEvents ?? []), ...(criticalEvents.data?.sensorEvents ?? [])].sort(
-    (first, second) => new Date(second.occurredAt).getTime() - new Date(first.occurredAt).getTime(),
-  )
+  const events = [...(emergencyEvents.data?.sensorEvents ?? []), ...(criticalEvents.data?.sensorEvents ?? [])]
+    .filter((event) => event.status !== 'resolved')
+    .sort((first, second) => new Date(second.occurredAt).getTime() - new Date(first.occurredAt).getTime())
   const isPending = criticalEvents.isPending || emergencyEvents.isPending || offlineSensors.isPending
   const hasError = criticalEvents.isError || emergencyEvents.isError || offlineSensors.isError
   const isFetching = criticalEvents.isFetching || emergencyEvents.isFetching || offlineSensors.isFetching

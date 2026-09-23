@@ -12,8 +12,10 @@ export interface SensorEvent {
     payload: any,
     acknowledgedAt: Date,
     acknowledgedByEmployeeId: string,
+    acknowledgedByEmployeeName: string,
     resolvedAt: Date,
     resolvedByEmployeeId: string,
+    resolvedByEmployeeName: string,
     resolutionNotes: string,
     createdAt: Date,
 }
