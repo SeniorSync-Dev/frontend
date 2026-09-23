@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useLocation, useNavigate, useSearch } from '@tanstack/react-router'
 import { ToggleButton, ToggleButtonGroup } from '@heroui/react'
-import { ArrowLeft, UserMinus } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { useLinkedCitizens } from '../../lib/relative/api'
 import { VisitModal } from '../../lib/relative/VisitModal'
 import { RemoveCitizenModal } from '../../lib/relative/RemoveCitizenModal'
@@ -61,20 +61,7 @@ function CitizenLayout() {
         )}
 
         {isOverview && (
-          <RemoveCitizenModal
-            citizenId={citizenId}
-            citizenName={citizen?.name ?? 'borgeren'}
-            trigger={(open) => (
-              <button
-                onClick={open}
-                title="Fjern min adgang"
-                aria-label={`Fjern min adgang til ${citizen?.name ?? 'borgeren'}`}
-                className="flex size-9 flex-none items-center justify-center rounded-md text-muted hover:bg-surface-hover hover:text-danger"
-              >
-                <UserMinus className="size-4" aria-hidden />
-              </button>
-            )}
-          />
+          <RemoveCitizenModal citizenId={citizenId} citizenName={citizen?.name ?? 'borgeren'} />
         )}
       </header>
 

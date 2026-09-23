@@ -1,24 +1,15 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { AlertDialog, Button } from '@heroui/react'
 import { useNavigate } from '@tanstack/react-router'
 import { UserMinus } from 'lucide-react'
 import { useRemoveCitizenLink } from './api'
 
-const defaultTrigger = (open: () => void) => (
-  <Button variant="ghost" size="sm" className="self-start text-danger" onPress={open}>
-    <UserMinus className="size-4" aria-hidden />
-    Fjern min adgang
-  </Button>
-)
-
 export function RemoveCitizenModal({
   citizenId,
   citizenName,
-  trigger = defaultTrigger,
 }: {
   citizenId: string
   citizenName: string
-  trigger?: (open: () => void) => ReactNode
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
@@ -32,7 +23,14 @@ export function RemoveCitizenModal({
 
   return (
     <AlertDialog isOpen={isOpen} onOpenChange={setIsOpen}>
-      {trigger(() => setIsOpen(true))}
+      <button
+        onClick={() => setIsOpen(true)}
+        title="Fjern min adgang"
+        aria-label={`Fjern min adgang til ${citizenName}`}
+        className="flex size-9 flex-none items-center justify-center rounded-md text-muted hover:bg-surface-hover hover:text-danger"
+      >
+        <UserMinus className="size-4" aria-hidden />
+      </button>
 
       <AlertDialog.Backdrop isDismissable isKeyboardDismissDisabled={false}>
         <AlertDialog.Container>

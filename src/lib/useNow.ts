@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 
-export function useNow(intervalMs = 60_000) {
+const TICK_MS = 60_000
+
+export function useNow() {
   const [now, setNow] = useState(() => new Date())
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), intervalMs)
+    const id = setInterval(() => setNow(new Date()), TICK_MS)
     return () => clearInterval(id)
-  }, [intervalMs])
+  }, [])
 
   return now
 }

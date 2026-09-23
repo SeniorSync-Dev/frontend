@@ -1,6 +1,6 @@
 import { Pagination } from '@heroui/react'
 
-export const PAGE_SIZE = 8
+const PAGE_SIZE = 8
 
 export function pageCountOf(itemCount: number, pageSize = PAGE_SIZE) {
   return Math.max(1, Math.ceil(itemCount / pageSize))
