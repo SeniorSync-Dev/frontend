@@ -4,7 +4,7 @@ import { Alert, Button, Calendar, Card, Chip, EmptyState, Spinner } from '@herou
 import { CalendarDate } from '@internationalized/date'
 import { CalendarDays, Check, ChevronLeft, ChevronRight, CircleCheck, MapPin, Pencil, Trash2, Video, X, type LucideIcon } from 'lucide-react'
 import { authClient } from '../../../lib/auth-client'
-import { useCancelCitizenActivitySignup, useCitizenAppointments, useCompleteVisit, useDeleteVisit } from '../../../lib/relative/api'
+import { useCancelCitizenActivitySignup, useCitizenAppointments, useDeleteVisit } from '../../../lib/relative/api'
 import { VisitModal } from '../../../lib/relative/VisitModal'
 import { formatDateLabel, formatDayNumber, formatLongDate, formatShortWeekday, formatTime, formatTimeRange } from '../../../lib/format'
 import { ListPagination, pageCountOf, pageSlice } from '../../../lib/ListPagination'
@@ -67,10 +67,6 @@ function isOwnVisit(appointment: Appointment, ownUserId?: string) {
   return appointment.type !== 'activity' && !!appointment.createdByUserId && appointment.createdByUserId === ownUserId
 }
 
-function canComplete(appointment: Appointment, now: Date, ownUserId?: string) {
-  return isOwnVisit(appointment, ownUserId) && isOver(appointment, now) && !appointment.isCompleted
-}
-
 function CitizenCalendar() {
   const { citizenId } = Route.useParams()
   const { view } = Route.useSearch()
@@ -78,7 +74,6 @@ function CitizenCalendar() {
   const { data: appointments, error, refetch } = useCitizenAppointments(citizenId)
   const cancelMutation = useCancelCitizenActivitySignup(citizenId)
   const deleteVisitMutation = useDeleteVisit(citizenId)
-  const completeVisitMutation = useCompleteVisit(citizenId)
 
   const [weekOffset, setWeekOffset] = useState(0)
   const [selectedDate, setSelectedDate] = useState<CalendarDate | null>(null)
@@ -109,8 +104,7 @@ function CitizenCalendar() {
   function isManaging(id: string) {
     return (
       (cancelMutation.isPending && cancelMutation.variables === id) ||
-      (deleteVisitMutation.isPending && deleteVisitMutation.variables === id) ||
-      (completeVisitMutation.isPending && completeVisitMutation.variables === id)
+      (deleteVisitMutation.isPending && deleteVisitMutation.variables === id)
     )
   }
 
@@ -139,8 +133,7 @@ function CitizenCalendar() {
     )
   }
 
-  const manageError =
-    cancelMutation.error ?? deleteVisitMutation.error ?? completeVisitMutation.error
+  const manageError = cancelMutation.error ?? deleteVisitMutation.error
 
   return (
     <div className="flex flex-col gap-4">
@@ -163,7 +156,6 @@ function CitizenCalendar() {
           now={now}
           isManaging={isManaging}
           onManage={handleManage}
-          onComplete={(appointment) => completeVisitMutation.mutate(appointment.id)}
         />
       ) : (
         <div className="flex flex-col gap-6">
@@ -206,7 +198,6 @@ function CitizenCalendar() {
                     now={now}
                     isManaging={isManaging(appointment.id)}
                     onManage={() => handleManage(appointment)}
-                    onComplete={() => completeVisitMutation.mutate(appointment.id)}
                   />
                 ))}
 
@@ -234,7 +225,6 @@ function WeekView({
   now,
   isManaging,
   onManage,
-  onComplete,
 }: {
   citizenId: string
   appointments: Appointment[]
@@ -244,7 +234,6 @@ function WeekView({
   now: Date
   isManaging: (id: string) => boolean
   onManage: (appointment: Appointment) => void
-  onComplete: (appointment: Appointment) => void
 }) {
   const monday = useMemo(() => {
     const start = startOfWeek(now)
@@ -303,7 +292,6 @@ function WeekView({
             ownUserId={ownUserId}
             isManaging={isManaging}
             onManage={onManage}
-            onComplete={onComplete}
           />
         ))}
       </div>
@@ -320,7 +308,6 @@ function DayColumn({
   ownUserId,
   isManaging,
   onManage,
-  onComplete,
 }: {
   citizenId: string
   day: Date
@@ -330,7 +317,6 @@ function DayColumn({
   ownUserId?: string
   isManaging: (id: string) => boolean
   onManage: (appointment: Appointment) => void
-  onComplete: (appointment: Appointment) => void
 }) {
   return (
     <div className="flex flex-col border-b border-border last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0">
@@ -378,18 +364,6 @@ function DayColumn({
                     </span>
                   )}
 
-                  {canComplete(appointment, now, ownUserId) && (
-                    <button
-                      onClick={() => onComplete(appointment)}
-                      disabled={isManaging(appointment.id)}
-                      title="Marker som udført"
-                      aria-label={`Marker ${appointment.title} som udført`}
-                      className="flex size-6 items-center justify-center rounded-md text-muted hover:bg-surface-hover hover:text-success disabled:opacity-50"
-                    >
-                      <Check className="size-3.5" aria-hidden />
-                    </button>
-                  )}
-
                   {isOwnVisit(appointment, ownUserId) && !appointment.isCompleted && (
                     <VisitModal
                       citizenId={citizenId}
@@ -434,7 +408,6 @@ function AppointmentRow({
   now,
   isManaging,
   onManage,
-  onComplete,
 }: {
   citizenId: string
   appointment: Appointment
@@ -442,7 +415,6 @@ function AppointmentRow({
   now: Date
   isManaging: boolean
   onManage: () => void
-  onComplete: () => void
 }) {
   const Icon = typeIcon[appointment.type]
   const details = [formatTimeRange(appointment.start, appointment.end), appointment.location]
@@ -472,18 +444,6 @@ function AppointmentRow({
           <Chip color={typeChipColor[appointment.type]} variant="soft" size="sm" className="gap-1">
             <Icon className="size-3.5" aria-hidden />
           </Chip>
-        )}
-
-        {canComplete(appointment, now, ownUserId) && (
-          <button
-            onClick={onComplete}
-            disabled={isManaging}
-            title="Marker som udført"
-            aria-label={`Marker ${appointment.title} som udført`}
-            className="flex size-7 flex-none items-center justify-center rounded-md text-muted hover:bg-surface-hover hover:text-success disabled:opacity-50"
-          >
-            <Check className="size-3.5" aria-hidden />
-          </button>
         )}
 
         {isOwnVisit(appointment, ownUserId) && !appointment.isCompleted && (

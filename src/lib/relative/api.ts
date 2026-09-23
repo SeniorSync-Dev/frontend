@@ -134,20 +134,6 @@ export function useUpdateVisit(citizenId: string) {
   })
 }
 
-export function useCompleteVisit(citizenId: string) {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (visitId: string) =>
-      apiRequest<AppointmentDto[]>(`/relative/citizens/${citizenId}/visits/${visitId}/complete`, {
-        method: 'PATCH',
-      }).then((dtos) => dtos.map(parseAppointment)),
-    onSuccess: (appointments) => {
-      queryClient.setQueryData(['relative', 'citizens', citizenId, 'appointments'], appointments)
-    },
-  })
-}
-
 export function useDeleteVisit(citizenId: string) {
   const queryClient = useQueryClient()
 
