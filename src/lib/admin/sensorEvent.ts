@@ -7,13 +7,15 @@ export type UseSensorEventsOptions = {
     status?: SensorEventStatus;
     page?: number;
     pageSize?: number;
+    refetchInterval?: number;
 };
 
 export function useSensorEvents(options: UseSensorEventsOptions = {}) {
-    const { severity, status, page, pageSize } = options;
+    const { severity, status, page, pageSize, refetchInterval } = options;
 
     return useQuery({
         queryKey: ["admin", "sensor-events", { status, severity, page, pageSize }],
+        refetchInterval,
         queryFn: () => {
             const searchParams = new URLSearchParams();
 

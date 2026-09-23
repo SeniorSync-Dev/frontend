@@ -7,13 +7,15 @@ export type UseSensorsOptions = {
     status?: SensorStatus;
     page?: number;
     pageSize?: number;
+    refetchInterval?: number;
 };
 
 export function useSensors(options: UseSensorsOptions = {}) {
-    const { assignment, status, page, pageSize } = options;
+    const { assignment, status, page, pageSize, refetchInterval } = options;
 
     return useQuery({
-        queryKey: ["admin", "sensors", { assignment, page, pageSize }],
+        queryKey: ["admin", "sensors", { assignment, status, page, pageSize }],
+        refetchInterval,
         queryFn: () => {
             const searchParams = new URLSearchParams();
 
