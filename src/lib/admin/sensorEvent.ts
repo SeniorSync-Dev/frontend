@@ -10,10 +10,10 @@ export type UseSensorEventsOptions = {
     refetchInterval?: number;
 };
 
-export function useSensorEvents(options: UseSensorEventsOptions = {}) {
+export function sensorEventsQueryOptions(options: UseSensorEventsOptions = {}) {
     const { severity, status, page, pageSize, refetchInterval } = options;
 
-    return useQuery({
+    return {
         queryKey: ["admin", "sensor-events", { status, severity, page, pageSize }],
         refetchInterval,
         queryFn: () => {
@@ -27,7 +27,11 @@ export function useSensorEvents(options: UseSensorEventsOptions = {}) {
             const query = searchParams.toString();
             return apiRequest<SensorEventsResponse>(`/sensor-events${query ? `?${query}` : ""}`);
         },
-    });
+    };
+}
+
+export function useSensorEvents(options: UseSensorEventsOptions = {}) {
+    return useQuery(sensorEventsQueryOptions(options));
 }
 
 export function useAcknowledgeSensorEvent() {
@@ -51,8 +55,8 @@ export function useResolveSensorEvent() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (input: { sensorId: string, resolutionNotes: string }) =>
-            apiRequest<SensorEvent>(`/sensor-events/${input.sensorId}/resolve`, {
+        mutationFn: (input: { sensorEventId: string, resolutionNotes: string }) =>
+            apiRequest<SensorEvent>(`/sensor-events/${input.sensorEventId}/resolve`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ resolutionNotes: input.resolutionNotes }),

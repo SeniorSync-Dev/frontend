@@ -78,7 +78,7 @@ function KioskPage() {
     <main className="min-h-full bg-background px-5 py-6 text-foreground sm:px-8 sm:py-8 lg:px-12">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         <header className="flex flex-wrap items-end justify-between gap-4">
-          <div><p className="text-sm font-semibold tracking-[0.2em] text-primary uppercase">SeniorSync</p><h1 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">Driftsoversigt</h1><p className="mt-2 text-sm text-muted">Kritiske hændelser og enheder, der kræver opmærksomhed.</p></div>
+          <div><h1 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">Driftsoversigt</h1><p className="mt-2 text-sm text-muted">Kritiske hændelser og enheder, der kræver opmærksomhed.</p></div>
           <Button variant="secondary" isPending={isFetching} onPress={refresh}><RefreshCw className="size-4" aria-hidden />Opdater</Button>
         </header>
 

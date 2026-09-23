@@ -2,10 +2,11 @@ import { Avatar, Spinner } from '@heroui/react'
 import { Link, Outlet, createFileRoute, redirect, useLocation } from '@tanstack/react-router'
 import { authClient } from '../lib/auth-client'
 import { getInitials } from '../lib/initials'
+import { BuildingComplex, MopSparkles, Siren, BellRing, Cpu, House, SportShoe} from 'lucide-react'
 
 export const Route = createFileRoute('/admin')({
   beforeLoad: async ({ location }) => {
-    // The sign-in screen must remain public so an unauthenticated visitor can sign in.
+    // We have to leave the signin page unprotected else users cannot signin
     if (location.pathname === '/admin/signin') return
 
     const { data: session } = await authClient.getSession()
@@ -61,27 +62,31 @@ function AdminLayout() {
                 activeProps={{ className: activeNavClassName }}
                 activeOptions={{ exact: true }}
               >
-                <DashboardIcon />
+                <BuildingComplex/>
                 Organisation
               </Link>
               <Link to="/admin/visits" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
+                <MopSparkles/>
                 Besøg
               </Link>
               <Link to="/admin/kioskPage" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
-                Alarmoversigt
+                <Siren />
+                Alarmoversigt (Kiosk Side)
+              </Link>
+              <Link to="/admin/sensor-events" className={navClassName} activeProps={{ className: activeNavClassName }}>
+                <BellRing />
+                Sensorhændelser
               </Link>
               <Link to="/admin/sensors" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
+                <Cpu />
                 Sensorer
               </Link>
               <Link to="/admin/facilities" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
+                <House/>
                 Faciliteter
               </Link>
               <Link to="/admin/activities" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
+                <SportShoe />
                 Aktiviteter
               </Link>
             </nav>
