@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createFileRoute, Navigate } from '@tanstack/react-router'
+import { createFileRoute, Link, Navigate } from '@tanstack/react-router'
 import { Alert, Card, Chip, EmptyState, Input, Spinner, TextArea } from '@heroui/react'
 import { CalendarDays, Check, MapPin, Video, type LucideIcon } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
@@ -241,6 +241,17 @@ function AppointmentCard({
           >
             Afmeld dig
           </Button>
+        )}
+
+        {appointment.type === 'screen_visit' && (
+          <Link
+            to="/screen-visit/$appointmentId"
+            params={{ appointmentId: appointment.id }}
+            className="flex h-14 items-center gap-3 rounded-xl bg-accent px-6 text-xl font-bold text-on-accent no-underline hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          >
+            <Video className="size-6" aria-hidden />
+            Deltag
+          </Link>
         )}
       </div>
     </Card>

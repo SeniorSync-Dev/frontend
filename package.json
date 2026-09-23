@@ -12,6 +12,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@cloudflare/realtimekit-react": "^2.0.2",
+    "@cloudflare/realtimekit-react-ui": "^2.0.2",
     "@heroui/react": "^3.2.4",
     "@heroui/styles": "^3.2.4",
     "@tailwindcss/vite": "^4.1.18",

@@ -8,8 +8,16 @@ const visitStatusLabels = {
 
 type VisitStatus = keyof typeof visitStatusLabels;
 
+const visitTypeLabels = {
+    visit: "Fysisk besøg",
+    call: "Skærmbesøg",
+} as const;
+
+type VisitType = keyof typeof visitTypeLabels;
+
 interface Visit {
     id: string;
+    type: VisitType;
     title: string;
     description: string | null;
     scheduledStart: string;
@@ -36,5 +44,5 @@ interface VisitOptions {
     employees: VisitEmployee[];
 }
 
-export { visitStatusLabels };
-export type { VisitStatus, Visit, VisitCitizen, VisitEmployee, VisitOptions };
+export { visitStatusLabels, visitTypeLabels };
+export type { VisitStatus, VisitType, Visit, VisitCitizen, VisitEmployee, VisitOptions };
