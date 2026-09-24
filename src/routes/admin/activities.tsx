@@ -4,7 +4,8 @@ import { Alert, Button, Card, Chip, Input } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
 import { useActivities, useCreateActivity, useDeleteActivity, useUpdateActivity } from '../../lib/admin/activities'
 import { useFacilities } from '../../lib/admin/facilities'
-import { useMyServiceProviderCompanyId } from '../../lib/admin/serviceProviders'
+import { useMyServiceProviderCompany } from '../../lib/admin/serviceProviders'
+import { serviceProviderCategoryLabels } from '../../models/service-provider'
 import { activityTypeLabels } from '../../models/admin-activity'
 import type { Activity, ActivityType } from '../../models/admin-activity'
 
@@ -51,7 +52,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function RouteComponent() {
   const { data: activeMemberRole } = authClient.useActiveMemberRole()
-  const { data: myCompany } = useMyServiceProviderCompanyId()
+  const { data: myCompany } = useMyServiceProviderCompany()
   const { data: activities = [], isError: activitiesError } = useActivities()
   const { data: facilities = [], isError: facilitiesError } = useFacilities()
   const createActivity = useCreateActivity()
@@ -59,7 +60,7 @@ function RouteComponent() {
   const deleteActivity = useDeleteActivity()
 
   const role = activeMemberRole?.role
-  const myCompanyId = myCompany?.companyId ?? null
+  const myCompanyId = myCompany?.company?.id ?? null
 
   function canManage(activity: Activity) {
     if (role === 'systemAdmin' || role === 'employee') return true
@@ -127,7 +128,16 @@ function RouteComponent() {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-12 sm:px-6">
-      <h1 className="text-2xl font-semibold">Aktiviteter</h1>
+      <div>
+        <h1 className="text-2xl font-semibold">Aktiviteter</h1>
+        {role === 'servicePartner' && (
+          <p className="text-sm text-muted">
+            {myCompany?.company
+              ? `Du repræsenterer ${myCompany.company.name} (${serviceProviderCategoryLabels[myCompany.company.category]})`
+              : 'Din konto er ikke tilknyttet en serviceudbyder endnu.'}
+          </p>
+        )}
+      </div>
 
       {error && (
         <Alert status="danger">

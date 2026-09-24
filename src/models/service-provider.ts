@@ -15,5 +15,17 @@ interface ServiceProviderCompany {
     email: string | null;
 }
 
+interface ServiceProviderStaff {
+    userId: string;
+    userName: string;
+    userEmail: string;
+    companyId: string;
+    companyName: string;
+}
+
 export { serviceProviderCategoryLabels };
-export type { ServiceProviderCategory, ServiceProviderCompany };
+export type {
+    ServiceProviderCategory,
+    ServiceProviderCompany,
+    ServiceProviderStaff,
+};

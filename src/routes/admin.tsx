@@ -2,6 +2,7 @@ import { Avatar, Spinner } from '@heroui/react'
 import { Link, Outlet, createFileRoute, redirect, useLocation } from '@tanstack/react-router'
 import { authClient } from '../lib/auth-client'
 import { getInitials } from '../lib/initials'
+import { useMyServiceProviderCompany } from '../lib/admin/serviceProviders'
 import { BuildingComplex, MopSparkles, Siren, BellRing, Cpu, House, SportShoe, Handshake} from 'lucide-react'
 
 export const Route = createFileRoute('/admin')({
@@ -38,6 +39,7 @@ function AdminLayout() {
   const isAdmin =
     activeMemberRole?.role === 'systemAdmin' || activeMemberRole?.role === 'employee'
   const isServicePartner = activeMemberRole?.role === 'servicePartner'
+  const { data: myCompany } = useMyServiceProviderCompany()
 
   if (location.pathname === '/admin/signin') {
     return <Outlet />
@@ -100,10 +102,12 @@ function AdminLayout() {
           )}
           {isServicePartner && (
             <nav aria-label="Service Partner" className="flex flex-col gap-1">
-              <p className="px-3 pb-2 text-xs font-semibold tracking-wider text-muted uppercase">Service Partner</p>
+              <p className="px-3 pb-2 text-xs font-semibold tracking-wider text-muted uppercase">
+                {myCompany?.company?.name ?? 'Service Partner'}
+              </p>
               <Link to="/admin/activities" className={navClassName} activeProps={{ className: activeNavClassName }}>
                 <SportShoe />
-                Service Partner
+                Aktiviteter
               </Link>
             </nav>
           )}

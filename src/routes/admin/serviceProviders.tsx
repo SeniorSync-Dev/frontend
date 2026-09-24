@@ -1,9 +1,16 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert, Button, Card, Input } from '@heroui/react'
-import { useCreateServiceProviderCompany, useServiceProviderCompanies } from '../../lib/admin/serviceProviders'
+import {
+  useCreateServiceProviderCompany,
+  useRemoveServiceProviderStaff,
+  useServiceProviderCompanies,
+  useServiceProviderStaff,
+  useUpdateServiceProviderStaff,
+} from '../../lib/admin/serviceProviders'
+import { authClient } from '../../lib/auth-client'
 import { serviceProviderCategoryLabels } from '../../models/service-provider'
-import type { ServiceProviderCategory } from '../../models/service-provider'
+import type { ServiceProviderCategory, ServiceProviderCompany } from '../../models/service-provider'
 
 export const Route = createFileRoute('/admin/serviceProviders')({
   component: RouteComponent,
@@ -31,20 +38,54 @@ function CategorySelect({
   )
 }
 
+function StaffCompanySelect({
+  companies,
+  value,
+  onChange,
+}: {
+  companies: Array<ServiceProviderCompany>
+  value: string
+  onChange: (companyId: string) => void
+}) {
+  return (
+    <select
+      className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {companies.map((company) => (
+        <option key={company.id} value={company.id}>
+          {company.name}
+        </option>
+      ))}
+    </select>
+  )
+}
+
 function RouteComponent() {
+  const { data: activeMemberRole } = authClient.useActiveMemberRole()
+  const isSystemAdmin = activeMemberRole?.role === 'systemAdmin'
+
   const { data: companies = [], isError: companiesError } = useServiceProviderCompanies()
+  const { data: staff = [], isError: staffError } = useServiceProviderStaff(isSystemAdmin)
   const createCompany = useCreateServiceProviderCompany()
+  const updateStaff = useUpdateServiceProviderStaff()
+  const removeStaff = useRemoveServiceProviderStaff()
 
   const [name, setName] = useState('')
   const [category, setCategory] = useState<ServiceProviderCategory>('other')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
 
-  const error = companiesError
+  const error = companiesError || (isSystemAdmin && staffError)
     ? 'Kunne ikke hente serviceudbydere.'
     : createCompany.isError
       ? 'Kunne ikke oprette serviceudbyderen.'
-      : null
+      : updateStaff.isError
+        ? 'Kunne ikke flytte medarbejderen.'
+        : removeStaff.isError
+          ? 'Kunne ikke fjerne medarbejderen.'
+          : null
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -100,6 +141,46 @@ function RouteComponent() {
           )}
         </Card.Content>
       </Card>
+
+      {isSystemAdmin && (
+        <Card>
+          <Card.Header>
+            <Card.Title>Medarbejdere hos serviceudbydere</Card.Title>
+            <Card.Description>Flyt en medarbejder til en anden serviceudbyder, eller fjern dem helt.</Card.Description>
+          </Card.Header>
+          <Card.Content className="flex flex-col gap-3">
+            {staff.length === 0 ? (
+              <p className="text-sm text-muted">Ingen medarbejdere tilknyttet endnu.</p>
+            ) : (
+              staff.map((member) => (
+                <div
+                  key={member.userId}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-4 py-3"
+                >
+                  <div>
+                    <p className="text-sm font-medium">{member.userName}</p>
+                    <p className="text-sm text-muted">{member.userEmail}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <StaffCompanySelect
+                      companies={companies}
+                      value={member.companyId}
+                      onChange={(companyId) => updateStaff.mutate({ userId: member.userId, companyId })}
+                    />
+                    <Button
+                      variant="danger-soft"
+                      size="sm"
+                      onPress={() => removeStaff.mutate(member.userId)}
+                    >
+                      Fjern
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </Card.Content>
+        </Card>
+      )}
 
       <Card>
         <Card.Header>

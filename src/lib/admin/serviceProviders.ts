@@ -3,6 +3,7 @@ import { apiRequest } from "../api";
 import type {
     ServiceProviderCategory,
     ServiceProviderCompany,
+    ServiceProviderStaff,
 } from "../../models/service-provider";
 
 type CreateServiceProviderCompanyInput = {
@@ -20,11 +21,11 @@ export function useServiceProviderCompanies() {
     });
 }
 
-export function useMyServiceProviderCompanyId() {
+export function useMyServiceProviderCompany() {
     return useQuery({
         queryKey: ["admin", "service-providers", "me"],
         queryFn: () =>
-            apiRequest<{ companyId: string | null }>(
+            apiRequest<{ company: ServiceProviderCompany | null }>(
                 "/api/service-providers/me",
             ),
     });
@@ -43,6 +44,58 @@ export function useCreateServiceProviderCompany() {
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ["admin", "service-providers"],
+            });
+        },
+    });
+}
+
+export function useServiceProviderStaff(enabled = true) {
+    return useQuery({
+        queryKey: ["admin", "service-providers", "staff"],
+        queryFn: () =>
+            apiRequest<ServiceProviderStaff[]>("/api/service-providers/staff"),
+        enabled,
+    });
+}
+
+export function useUpdateServiceProviderStaff() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({
+            userId,
+            companyId,
+        }: {
+            userId: string;
+            companyId: string;
+        }) =>
+            apiRequest<ServiceProviderStaff>(
+                `/api/service-providers/staff/${userId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ companyId }),
+                },
+            ),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["admin", "service-providers", "staff"],
+            });
+        },
+    });
+}
+
+export function useRemoveServiceProviderStaff() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (userId: string) =>
+            apiRequest<void>(`/api/service-providers/staff/${userId}`, {
+                method: "DELETE",
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["admin", "service-providers", "staff"],
             });
         },
     });
