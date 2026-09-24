@@ -17,12 +17,7 @@ async function Profile() {
   const role = activeMemberRole?.role ?? null
 
   function signOut() {
-    authClient.signOut({
-      fetchOptions: {
-        // TODO: This still doens't work because it sendes us to signicat logout page instead.
-        onSuccess: () => navigate({ to: '/auth/signin' }),
-      },
-    })
+    authClient.signOut()
   }
 
   function changeEmail(event: SubmitEvent<HTMLFormElement>) {
@@ -70,7 +65,7 @@ async function Profile() {
           <Button variant="secondary" onPress={() => refetch()}>
             Prøv igen
           </Button>
-          <Button variant="primary" onPress={() => navigate({ to: '/auth/signin' })}>
+          <Button variant="primary" onPress={() => navigate({ to: '/' })}>
             Log ind
           </Button>
         </div>
@@ -87,7 +82,7 @@ async function Profile() {
             <Card.Description>Log ind med MitID for at se din profil.</Card.Description>
           </Card.Header>
           <Card.Footer className="justify-center">
-            <Button variant="primary" onPress={() => navigate({ to: '/auth/signin' })}>
+            <Button variant="primary" onPress={() => navigate({ to: '/' })}>
               Log ind med MitID
             </Button>
           </Card.Footer>
