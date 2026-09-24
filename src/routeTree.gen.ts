@@ -18,6 +18,7 @@ import { Route as AdminFacilitiesRouteImport } from './routes/admin/facilities'
 import { Route as AdminKioskPageRouteImport } from './routes/admin/kioskPage'
 import { Route as AdminSensorEventsRouteImport } from './routes/admin/sensor-events'
 import { Route as AdminSensorsRouteImport } from './routes/admin/sensors'
+import { Route as AdminServiceProvidersRouteImport } from './routes/admin/serviceProviders'
 import { Route as AdminSigninRouteImport } from './routes/admin/signin'
 import { Route as AdminVisitsRouteImport } from './routes/admin/visits'
 import { Route as AuthProfileRouteImport } from './routes/auth/profile'
@@ -71,6 +72,11 @@ const AdminSensorEventsRoute = AdminSensorEventsRouteImport.update({
 const AdminSensorsRoute = AdminSensorsRouteImport.update({
   id: '/sensors',
   path: '/sensors',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminServiceProvidersRoute = AdminServiceProvidersRouteImport.update({
+  id: '/serviceProviders',
+  path: '/serviceProviders',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSigninRoute = AdminSigninRouteImport.update({
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/sensor-events': typeof AdminSensorEventsRoute
   '/admin/sensors': typeof AdminSensorsRoute
+  '/admin/serviceProviders': typeof AdminServiceProvidersRoute
   '/admin/signin': typeof AdminSigninRoute
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/sensor-events': typeof AdminSensorEventsRoute
   '/admin/sensors': typeof AdminSensorsRoute
+  '/admin/serviceProviders': typeof AdminServiceProvidersRoute
   '/admin/signin': typeof AdminSigninRoute
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/admin/kioskPage': typeof AdminKioskPageRoute
   '/admin/sensor-events': typeof AdminSensorEventsRoute
   '/admin/sensors': typeof AdminSensorsRoute
+  '/admin/serviceProviders': typeof AdminServiceProvidersRoute
   '/admin/signin': typeof AdminSigninRoute
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
@@ -192,6 +201,7 @@ export interface FileRouteTypes {
     | '/admin/kioskPage'
     | '/admin/sensor-events'
     | '/admin/sensors'
+    | '/admin/serviceProviders'
     | '/admin/signin'
     | '/admin/visits'
     | '/auth/profile'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/admin/kioskPage'
     | '/admin/sensor-events'
     | '/admin/sensors'
+    | '/admin/serviceProviders'
     | '/admin/signin'
     | '/admin/visits'
     | '/auth/profile'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/admin/kioskPage'
     | '/admin/sensor-events'
     | '/admin/sensors'
+    | '/admin/serviceProviders'
     | '/admin/signin'
     | '/admin/visits'
     | '/auth/profile'
@@ -317,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSensorsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/serviceProviders': {
+      id: '/admin/serviceProviders'
+      path: '/serviceProviders'
+      fullPath: '/admin/serviceProviders'
+      preLoaderRoute: typeof AdminServiceProvidersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/signin': {
       id: '/admin/signin'
       path: '/signin'
@@ -390,6 +409,7 @@ interface AdminRouteChildren {
   AdminKioskPageRoute: typeof AdminKioskPageRoute
   AdminSensorEventsRoute: typeof AdminSensorEventsRoute
   AdminSensorsRoute: typeof AdminSensorsRoute
+  AdminServiceProvidersRoute: typeof AdminServiceProvidersRoute
   AdminSigninRoute: typeof AdminSigninRoute
   AdminVisitsRoute: typeof AdminVisitsRoute
 }
@@ -401,6 +421,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminKioskPageRoute: AdminKioskPageRoute,
   AdminSensorEventsRoute: AdminSensorEventsRoute,
   AdminSensorsRoute: AdminSensorsRoute,
+  AdminServiceProvidersRoute: AdminServiceProvidersRoute,
   AdminSigninRoute: AdminSigninRoute,
   AdminVisitsRoute: AdminVisitsRoute,
 }

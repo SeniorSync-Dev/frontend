@@ -148,6 +148,7 @@ function ActivityCard({
     `Kl. ${formatTimeRange(activity.start, activity.end)}`,
     activity.location,
     activity.meetingPoint && `Vi mødes ${activity.meetingPoint}`,
+    activity.providerCompanyName && `Arrangeret af ${activity.providerCompanyName}`,
     !activity.isSignedUp && activity.availableSpots !== undefined && `${activity.availableSpots} ledige pladser`,
   ]
     .filter(Boolean)

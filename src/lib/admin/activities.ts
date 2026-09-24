@@ -37,6 +37,24 @@ export function useCreateActivity() {
     });
 }
 
+export function useUpdateActivity() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, ...input }: CreateActivityInput & { id: string }) =>
+            apiRequest<Activity>(`/api/activities/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(input),
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["admin", "activities"],
+            });
+        },
+    });
+}
+
 export function useDeleteActivity() {
     const queryClient = useQueryClient();
 

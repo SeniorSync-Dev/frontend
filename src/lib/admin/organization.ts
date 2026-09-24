@@ -43,6 +43,7 @@ export function useInviteMember(organizationId: string | undefined) {
             email: string;
             role: OrgRole;
             facilityId?: string;
+            serviceProviderCompanyId?: string;
         }) => {
             const { error } = await authClient.organization.inviteMember({
                 organizationId: organizationId!,
@@ -50,6 +51,12 @@ export function useInviteMember(organizationId: string | undefined) {
                 role: input.role,
                 ...(input.role === "citizen"
                     ? { facilityId: input.facilityId }
+                    : {}),
+                ...(input.role === "servicePartner"
+                    ? {
+                          serviceProviderCompanyId:
+                              input.serviceProviderCompanyId,
+                      }
                     : {}),
             });
             if (error)

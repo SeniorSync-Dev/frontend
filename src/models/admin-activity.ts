@@ -17,6 +17,9 @@ interface Activity {
     endsAt: string;
     capacity: number | null;
     locationName: string | null;
+    createdByUserId: string;
+    providerCompanyId: string | null;
+    providerCompanyName: string | null;
 }
 
 export { activityTypeLabels };

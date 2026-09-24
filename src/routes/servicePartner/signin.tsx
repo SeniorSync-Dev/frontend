@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Alert, Button, Card } from '@heroui/react'
+import { Alert, Button, Card, Spinner } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
+import { describeAuthError, type AuthError } from '../../lib/auth-errors'
 
 type SignInSearch = {
   error?: string
@@ -17,43 +18,11 @@ export const Route = createFileRoute('/servicePartner/signin')({
   }),
 })
 
-type AuthError = {
-  status: 'default' | 'warning' | 'danger'
-  title: string
-  text: string
-}
-
-function describeAuthError(code?: string, description?: string): AuthError | null {
-  if (!code) return null
-
-  switch (code) {
-    case 'IDP-3200':
-    case 'access_denied':
-      return {
-        status: 'default',
-        title: 'Login blev afbrudt',
-        text: 'Du afbrød MitID-login. Du kan prøve igen, når du er klar.',
-      }
-    case 'state_mismatch':
-    case 'invalid_state':
-    case 'state_not_found':
-      return {
-        status: 'warning',
-        title: 'Login udløb',
-        text: 'Der gik for lang tid, eller siden blev åbnet i en anden browser. Prøv igen.',
-      }
-    default:
-      return {
-        status: 'danger',
-        title: 'Login mislykkedes',
-        text: description || 'Der opstod en fejl under login. Prøv venligst igen.',
-      }
-  }
-}
-
 function SignIn() {
   const navigate = Route.useNavigate()
   const { error: errorCode, error_description } = Route.useSearch()
+  const { data: session, isPending: isSessionPending } = authClient.useSession()
+  const { data: activeMemberRole, isPending: isRolePending } = authClient.useActiveMemberRole()
   const [isLoading, setIsLoading] = useState(false)
   const [authError, setAuthError] = useState<AuthError | null>(() =>
     describeAuthError(errorCode, error_description),
@@ -65,14 +34,20 @@ function SignIn() {
     navigate({ search: {}, replace: true })
   }, [errorCode, error_description, navigate])
 
+  useEffect(() => {
+    if (isSessionPending || isRolePending || !session) return
+    if (activeMemberRole?.role) {
+      navigate({ to: '/admin/activities', replace: true })
+    }
+  }, [isSessionPending, isRolePending, session, activeMemberRole, navigate])
+
   function signInWithMitID() {
+    const signinUrl = `${window.location.origin}/servicePartner/signin`
+
     authClient.signIn.social({
       provider: 'mitid',
-      callbackURL: `${window.location.origin}/admin/activities`,
-      errorCallbackURL: `${window.location.origin}/servicePartner/signin`,
-      additionalData: {
-        accountType: 'servicePartner',
-      },
+      callbackURL: signinUrl,
+      errorCallbackURL: signinUrl,
       fetchOptions: {
         onRequest: () => {
           setIsLoading(true)
@@ -88,6 +63,35 @@ function SignIn() {
         },
       },
     })
+  }
+
+  if (!isSessionPending && session && (isRolePending || !activeMemberRole?.role)) {
+    if (isRolePending) {
+      return (
+        <div className="flex flex-1 items-center justify-center py-24">
+          <Spinner size="lg" color="accent" aria-label="Henter…" />
+        </div>
+      )
+    }
+
+    return (
+      <div className="flex flex-1 items-center justify-center px-4 py-16">
+        <Card className="w-full max-w-md">
+          <Card.Header className="items-center text-center">
+            <Card.Title className="text-2xl h-8">Du er logget ind</Card.Title>
+            <Card.Description>
+              Din konto er endnu ikke inviteret af en organisation. Kontakt den facilitet eller
+              organisation, du samarbejder med, for at få adgang.
+            </Card.Description>
+          </Card.Header>
+          <Card.Footer className="justify-center text-sm text-muted">
+            <Link to="/" className="underline-offset-4 hover:underline">
+              Tilbage til forsiden
+            </Link>
+          </Card.Footer>
+        </Card>
+      </div>
+    )
   }
 
   return (

@@ -35,6 +35,10 @@ export const authClient = createAuthClient({
                             type: "string",
                             required: false,
                         },
+                        serviceProviderCompanyId: {
+                            type: "string",
+                            required: false,
+                        },
                     },
                 },
             },

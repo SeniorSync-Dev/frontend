@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Alert, Button, Card, Input, Spinner } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
 import { useFacilities } from '../../lib/admin/facilities'
+import { useServiceProviderCompanies } from '../../lib/admin/serviceProviders'
 import {
   useCancelInvitation,
   useInvitations,
@@ -13,6 +14,7 @@ import {
 import { orgRoleLabels } from '../../models/organization'
 import type { OrgRole } from '../../models/organization'
 import type { Facility } from '../../models/facility'
+import type { ServiceProviderCompany } from '../../models/service-provider'
 
 export const Route = createFileRoute('/admin/dashboard')({
   component: RouteComponent,
@@ -62,6 +64,34 @@ function FacilitySelect({
   )
 }
 
+function CompanySelect({
+  companies,
+  value,
+  onChange,
+}: {
+  companies: Array<ServiceProviderCompany>
+  value: string
+  onChange: (companyId: string) => void
+}) {
+  return (
+    <select
+      required
+      className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      <option value="" disabled>
+        Vælg serviceudbyder
+      </option>
+      {companies.map((company) => (
+        <option key={company.id} value={company.id}>
+          {company.name}
+        </option>
+      ))}
+    </select>
+  )
+}
+
 function RouteComponent() {
   const navigate = useNavigate()
   const { data: session, isPending: isSessionPending, refetch: refetchSession } = authClient.useSession()
@@ -72,6 +102,7 @@ function RouteComponent() {
   const { data: members = [], isError: membersError } = useMembers(organization?.id)
   const { data: invitations = [], isError: invitationsError } = useInvitations(organization?.id)
   const { data: facilities = [], isError: facilitiesError } = useFacilities()
+  const { data: serviceProviderCompanies = [] } = useServiceProviderCompanies()
   const inviteMember = useInviteMember(organization?.id)
   const updateMemberRole = useUpdateMemberRole(organization?.id)
   const cancelInvitation = useCancelInvitation(organization?.id)
@@ -79,6 +110,7 @@ function RouteComponent() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<OrgRole>('citizen')
   const [inviteFacilityId, setInviteFacilityId] = useState('')
+  const [inviteCompanyId, setInviteCompanyId] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const error =
@@ -93,13 +125,20 @@ function RouteComponent() {
     e.preventDefault()
     if (!organization || !inviteEmail) return
     if (inviteRole === 'citizen' && !inviteFacilityId) return
+    if (inviteRole === 'servicePartner' && !inviteCompanyId) return
 
     inviteMember.mutate(
-      { email: inviteEmail, role: inviteRole, facilityId: inviteRole === 'citizen' ? inviteFacilityId : undefined },
+      {
+        email: inviteEmail,
+        role: inviteRole,
+        facilityId: inviteRole === 'citizen' ? inviteFacilityId : undefined,
+        serviceProviderCompanyId: inviteRole === 'servicePartner' ? inviteCompanyId : undefined,
+      },
       {
         onSuccess: () => {
           setInviteEmail('')
           setInviteFacilityId('')
+          setInviteCompanyId('')
         },
       },
     )
@@ -247,6 +286,9 @@ function RouteComponent() {
             <RoleSelect value={inviteRole} onChange={setInviteRole} />
             {inviteRole === 'citizen' && (
               <FacilitySelect facilities={facilities} value={inviteFacilityId} onChange={setInviteFacilityId} />
+            )}
+            {inviteRole === 'servicePartner' && (
+              <CompanySelect companies={serviceProviderCompanies} value={inviteCompanyId} onChange={setInviteCompanyId} />
             )}
             <Button type="submit" variant="primary">
               Opret invitation

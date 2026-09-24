@@ -2,7 +2,7 @@ import { Avatar, Spinner } from '@heroui/react'
 import { Link, Outlet, createFileRoute, redirect, useLocation } from '@tanstack/react-router'
 import { authClient } from '../lib/auth-client'
 import { getInitials } from '../lib/initials'
-import { BuildingComplex, MopSparkles, Siren, BellRing, Cpu, House, SportShoe} from 'lucide-react'
+import { BuildingComplex, MopSparkles, Siren, BellRing, Cpu, House, SportShoe, Handshake} from 'lucide-react'
 
 export const Route = createFileRoute('/admin')({
   beforeLoad: async ({ location }) => {
@@ -17,7 +17,10 @@ export const Route = createFileRoute('/admin')({
     const { data } = await authClient.organization.getActiveMemberRole();
     const userRole = data?.role;
 
-    if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee')) {
+    if (
+      !data ||
+      (userRole !== 'systemAdmin' && userRole !== 'employee' && userRole !== 'servicePartner')
+    ) {
       throw redirect({ to: '/' })
     }
   },
@@ -84,6 +87,10 @@ function AdminLayout() {
               <Link to="/admin/facilities" className={navClassName} activeProps={{ className: activeNavClassName }}>
                 <House/>
                 Faciliteter
+              </Link>
+              <Link to="/admin/serviceProviders" className={navClassName} activeProps={{ className: activeNavClassName }}>
+                <Handshake />
+                Serviceudbydere
               </Link>
               <Link to="/admin/activities" className={navClassName} activeProps={{ className: activeNavClassName }}>
                 <SportShoe />

@@ -32,6 +32,8 @@ function destinationForRole(role: string) {
     case 'employee':
     case 'systemAdmin':
       return '/admin/dashboard' as const
+    case 'servicePartner':
+      return '/admin/activities' as const
     default:
       return '/auth/profile' as const
   }

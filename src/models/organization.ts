@@ -2,6 +2,7 @@ const orgRoleLabels = {
     citizen: "Borger",
     relative: "Pårørende",
     employee: "Medarbejder",
+    servicePartner: "Serviceudbyder",
     systemAdmin: "Systemadministrator",
 } as const;
 
