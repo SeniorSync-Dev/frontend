@@ -6,7 +6,7 @@ import { getInitials } from '../../lib/initials'
 
 export const Route = createFileRoute('/auth/profile')({ component: Profile })
 
-async function Profile() {
+function Profile() {
   const navigate = useNavigate()
   const { data: session, isPending, error, refetch } = authClient.useSession()
   const [newEmail, setNewEmail] = useState('')
@@ -18,6 +18,27 @@ async function Profile() {
 
   function signOut() {
     authClient.signOut()
+  }
+
+  function goBack() {
+    switch (role) {
+      case 'employee':
+      case 'systemAdmin':
+        navigate({ to: '/admin/dashboard' })
+        return
+      case 'servicePartner':
+        navigate({ to: '/admin/activities' })
+        return
+      case 'relative':
+        //TODO navigate({ to: '/relative' }) when its implemented
+        window.location.assign('/relative/')
+        return
+      case 'citizen':
+        navigate({ to: '/citizen' })
+        return
+      default:
+        navigate({ to: '/' })
+    }
   }
 
   function changeEmail(event: SubmitEvent<HTMLFormElement>) {
@@ -175,9 +196,14 @@ async function Profile() {
         </Card.Content>
 
         <Card.Footer className="flex-wrap justify-between gap-2">
-          <Button variant="ghost" onPress={() => refetch()}>
-            Opdater
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" onPress={goBack}>
+              Tilbage Til App
+            </Button>
+            <Button variant="ghost" onPress={() => refetch()}>
+              Opdater
+            </Button>
+          </div>
           <Button variant="danger-soft" onPress={signOut}>
             Log ud
           </Button>
