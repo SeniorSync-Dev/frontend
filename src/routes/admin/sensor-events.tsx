@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useQueries } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, EmptyState, Modal, Spinner, useOverlayState } from '@heroui/react'
-import { Check, ClipboardCheck, RefreshCw, TriangleAlert } from 'lucide-react'
+import { Check, ClipboardCheck, RefreshCw } from 'lucide-react'
 import {
   sensorEventsQueryOptions,
   useAcknowledgeSensorEvent,

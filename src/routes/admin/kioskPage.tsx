@@ -23,6 +23,19 @@ function severityLabel(severity: SensorEventSeverity) {
   return severity === 'emergency' ? 'Akut' : 'Kritisk'
 }
 
+function statusLabel(status: string | null | undefined) {
+  const labels: Record<string, string> = {
+    new: 'Ny',
+    acknowledged: 'Kvitteret',
+    in_progress: 'Under behandling',
+    resolved: 'Løst',
+    false_alarm: 'Falsk alarm',
+    dismissed: 'Afvist',
+  }
+
+  return labels[status ?? ''] ?? status ?? 'Ukendt'
+}
+
 function EventCard({ event }: { event: SensorEvent }) {
   const severity = event.severity as SensorEventSeverity
   const isEmergency = severity === 'emergency'
@@ -48,7 +61,7 @@ function EventCard({ event }: { event: SensorEvent }) {
         </div>
         <dl className="grid gap-4 border-t border-foreground/10 pt-4 text-sm sm:grid-cols-2">
           <div><dt className="text-muted">Enhed</dt><dd className="mt-1 font-medium">{event.deviceSerialNumber || event.deviceType || 'Ukendt enhed'}</dd></div>
-          <div><dt className="text-muted">Status</dt><dd className="mt-1 font-medium">{event.status || 'Ny'}</dd></div>
+          <div><dt className="text-muted">Status</dt><dd className="mt-1 font-medium">{statusLabel(event.status)}</dd></div>
         </dl>
       </Card.Content>
     </Card>
