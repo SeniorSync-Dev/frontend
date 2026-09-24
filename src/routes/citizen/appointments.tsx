@@ -243,11 +243,11 @@ function AppointmentCard({
           </Button>
         )}
 
-        {appointment.type === 'screen_visit' && (
+        {appointment.type === 'screen_visit' && appointment.canJoin && (
           <Link
             to="/screen-visit/$appointmentId"
             params={{ appointmentId: appointment.id }}
-            className="flex h-14 items-center gap-3 rounded-xl bg-accent px-6 text-xl font-bold text-on-accent no-underline hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            className="flex h-14 items-center gap-3 rounded-xl bg-accent px-6 text-xl font-bold text-accent-foreground no-underline hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           >
             <Video className="size-6" aria-hidden />
             Deltag

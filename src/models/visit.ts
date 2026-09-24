@@ -26,6 +26,7 @@ interface Visit {
     citizenUserId: string;
     citizenName: string;
     assignedEmployeeId: string | null;
+    canJoin?: boolean;
     employeeName: string | null;
 }
 

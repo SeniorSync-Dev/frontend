@@ -9,6 +9,7 @@ interface Appointment {
   end?: Date
   location?: string
   staffName?: string
+  canJoin?: boolean
 }
 
 export type { AppointmentType, Appointment };

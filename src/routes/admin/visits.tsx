@@ -242,11 +242,12 @@ function RouteComponent() {
                       Tildel mig
                     </Button>
                   ) : (
-                    visit.type === 'call' && (
+                    visit.type === 'call' &&
+                    visit.canJoin && (
                       <Link
                         to="/screen-visit/$appointmentId"
                         params={{ appointmentId: visit.id }}
-                        className="flex items-center gap-2 rounded-md bg-accent px-3 py-2 text-sm font-medium text-on-accent no-underline hover:opacity-90"
+                        className="flex items-center gap-2 rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground no-underline hover:opacity-90"
                       >
                         <Video className="size-4" aria-hidden />
                         Deltag
