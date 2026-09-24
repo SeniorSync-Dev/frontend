@@ -30,6 +30,22 @@ function Home() {
             Log ind som pårørende
           </Button>
         </div>
+
+        <div className="mt-6 flex flex-col items-center gap-2 text-sm text-muted">
+          <span>Er du medarbejder eller servicepartner?</span>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onPress={() => navigate({ to: '/admin/signin' })}>
+              Medarbejder
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onPress={() => navigate({ to: '/servicePartner/signin' })}
+            >
+              Servicepartner
+            </Button>
+          </div>
+        </div>
       </section>
     </div>
   )

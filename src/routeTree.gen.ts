@@ -22,6 +22,7 @@ import { Route as AdminSigninRouteImport } from './routes/admin/signin'
 import { Route as AdminVisitsRouteImport } from './routes/admin/visits'
 import { Route as AuthProfileRouteImport } from './routes/auth/profile'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
+import { Route as AuthUnauthorizedRouteImport } from './routes/auth/unauthorized'
 import { Route as CitizenIndexRouteImport } from './routes/citizen/index'
 import { Route as CitizenActivitiesRouteImport } from './routes/citizen/activities'
 import { Route as CitizenAppointmentsRouteImport } from './routes/citizen/appointments'
@@ -93,6 +94,11 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
   path: '/auth/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthUnauthorizedRoute = AuthUnauthorizedRouteImport.update({
+  id: '/auth/unauthorized',
+  path: '/auth/unauthorized',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CitizenIndexRoute = CitizenIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/auth/unauthorized': typeof AuthUnauthorizedRoute
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/servicePartner/signin': typeof ServicePartnerSigninRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/auth/unauthorized': typeof AuthUnauthorizedRoute
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/servicePartner/signin': typeof ServicePartnerSigninRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/auth/unauthorized': typeof AuthUnauthorizedRoute
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/servicePartner/signin': typeof ServicePartnerSigninRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/admin/visits'
     | '/auth/profile'
     | '/auth/signin'
+    | '/auth/unauthorized'
     | '/citizen/activities'
     | '/citizen/appointments'
     | '/servicePartner/signin'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/admin/visits'
     | '/auth/profile'
     | '/auth/signin'
+    | '/auth/unauthorized'
     | '/citizen/activities'
     | '/citizen/appointments'
     | '/servicePartner/signin'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/admin/visits'
     | '/auth/profile'
     | '/auth/signin'
+    | '/auth/unauthorized'
     | '/citizen/activities'
     | '/citizen/appointments'
     | '/servicePartner/signin'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   CitizenRoute: typeof CitizenRouteWithChildren
   AuthProfileRoute: typeof AuthProfileRoute
   AuthSigninRoute: typeof AuthSigninRoute
+  AuthUnauthorizedRoute: typeof AuthUnauthorizedRoute
   ServicePartnerSigninRoute: typeof ServicePartnerSigninRoute
   AuthAcceptInvitationInvitationIdRoute: typeof AuthAcceptInvitationInvitationIdRoute
 }
@@ -345,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/unauthorized': {
+      id: '/auth/unauthorized'
+      path: '/auth/unauthorized'
+      fullPath: '/auth/unauthorized'
+      preLoaderRoute: typeof AuthUnauthorizedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/citizen/': {
       id: '/citizen/'
       path: '/'
@@ -428,6 +448,7 @@ const rootRouteChildren: RootRouteChildren = {
   CitizenRoute: CitizenRouteWithChildren,
   AuthProfileRoute: AuthProfileRoute,
   AuthSigninRoute: AuthSigninRoute,
+  AuthUnauthorizedRoute: AuthUnauthorizedRoute,
   ServicePartnerSigninRoute: ServicePartnerSigninRoute,
   AuthAcceptInvitationInvitationIdRoute: AuthAcceptInvitationInvitationIdRoute,
 }

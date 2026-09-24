@@ -17,8 +17,8 @@ export const Route = createFileRoute('/admin')({
     const { data } = await authClient.organization.getActiveMemberRole();
     const userRole = data?.role;
 
-    if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee')) {
-      throw redirect({ to: '/' })
+    if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee' && userRole !== 'servicePartner')) {
+      throw redirect({ to: '/auth/unauthorized' })
     }
   },
   component: AdminLayout,

@@ -1,12 +1,27 @@
 import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, EmptyState, Spinner } from '@heroui/react'
 import { Cpu, RefreshCw } from 'lucide-react'
 import { useAssignSensor, useSensors, useUnassignSensor } from '../../lib/admin/sensor'
 import { useVisitOptions } from '../../lib/admin/visits'
 import type { SensorAssignment } from '../../models/sensor'
+import { authClient } from '#/lib/auth-client'
 
 export const Route = createFileRoute('/admin/sensors')({
+  beforeLoad: async () => {
+    
+        const { data: session } = await authClient.getSession()
+        if (!session) {
+          throw redirect({ to: '/admin/signin' })
+        }
+    
+        const { data } = await authClient.organization.getActiveMemberRole();
+        const userRole = data?.role;
+    
+        if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee')) {
+          throw redirect({ to: '/auth/unauthorized' })
+        }
+      },
   component: RouteComponent,
 })
 
