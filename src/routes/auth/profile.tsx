@@ -1,5 +1,6 @@
+import { useState, type SubmitEvent } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Alert, Avatar, Button, Card, Spinner } from '@heroui/react'
+import { Alert, Avatar, Button, Card, Input, Spinner } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
 import { getInitials } from '../../lib/initials'
 
@@ -8,12 +9,39 @@ export const Route = createFileRoute('/auth/profile')({ component: Profile })
 function Profile() {
   const navigate = useNavigate()
   const { data: session, isPending, error, refetch } = authClient.useSession()
+  const [newEmail, setNewEmail] = useState('')
+  const [isChangingEmail, setIsChangingEmail] = useState(false)
+  const [emailChangeError, setEmailChangeError] = useState<string | null>(null)
+  const [emailChangeSuccess, setEmailChangeSuccess] = useState<string | null>(null)
 
   function signOut() {
     authClient.signOut({
       fetchOptions: {
         // TODO: This still doens't work because it sendes us to signicat logout page instead.
         onSuccess: () => navigate({ to: '/auth/signin' }),
+      },
+    })
+  }
+
+  function changeEmail(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setEmailChangeError(null)
+    setEmailChangeSuccess(null)
+
+    authClient.changeEmail({
+      newEmail,
+      callbackURL: '/auth/profile',
+      fetchOptions: {
+        onRequest: () => setIsChangingEmail(true),
+        onSuccess: async () => {
+          await refetch()
+          setNewEmail('')
+          setEmailChangeSuccess('Din e-mailadresse er blevet opdateret.')
+        },
+        onError: (ctx) => {
+          setEmailChangeError(ctx.error.message || 'E-mailadressen kunne ikke opdateres. Prøv igen.')
+        },
+        onResponse: () => setIsChangingEmail(false),
       },
     })
   }
@@ -98,6 +126,51 @@ function Profile() {
               </div>
             ))}
           </dl>
+
+          <form className="mt-8 border-t border-border pt-6" onSubmit={changeEmail}>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-base font-semibold">Skift e-mailadresse</h2>
+              <p className="text-sm text-muted">Indtast den e-mailadresse, du fremover vil bruge.</p>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+              <label className="flex flex-1 flex-col gap-1.5 text-sm font-medium">
+                Ny e-mailadresse
+                <Input
+                  type="email"
+                  value={newEmail}
+                  onChange={(event) => setNewEmail(event.target.value)}
+                  placeholder="navn@eksempel.dk"
+                  autoComplete="email"
+                  required
+                  fullWidth
+                />
+              </label>
+              <Button type="submit" variant="primary" isPending={isChangingEmail}>
+                Skift e-mail
+              </Button>
+            </div>
+
+            {emailChangeError && (
+              <Alert className="mt-4" status="danger">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>Kunne ikke skifte e-mailadresse</Alert.Title>
+                  <Alert.Description>{emailChangeError}</Alert.Description>
+                </Alert.Content>
+              </Alert>
+            )}
+
+            {emailChangeSuccess && (
+              <Alert className="mt-4" status="success">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>E-mailadresse opdateret</Alert.Title>
+                  <Alert.Description>{emailChangeSuccess}</Alert.Description>
+                </Alert.Content>
+              </Alert>
+            )}
+          </form>
         </Card.Content>
 
         <Card.Footer className="flex-wrap justify-between gap-2">
