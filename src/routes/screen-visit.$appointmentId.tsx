@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Alert, Button, Spinner } from '@heroui/react'
 import {
   RealtimeKitProvider,
@@ -7,7 +7,7 @@ import {
   useRealtimeKitMeeting,
 } from '@cloudflare/realtimekit-react'
 import { RtkMeeting } from '@cloudflare/realtimekit-react-ui'
-import { useJoinScreenVisit } from '../lib/screenVisit/api'
+import { useJoinScreenVisit, type ScreenVisitRole } from '../lib/screenVisit/api'
 
 export const Route = createFileRoute('/screen-visit/$appointmentId')({
   component: ScreenVisit,
@@ -43,10 +43,16 @@ function ScreenVisit() {
     )
   }
 
-  return <MeetingRoom authToken={data.token} />
+  return <MeetingRoom authToken={data.token} role={data.role} />
 }
 
-function MeetingRoom({ authToken }: { authToken: string }) {
+const returnPath = {
+  citizen: '/citizen/appointments',
+  employee: '/admin/visits',
+  relative: '/',
+} as const
+
+function MeetingRoom({ authToken, role }: { authToken: string; role: ScreenVisitRole }) {
   const [meeting, initMeeting] = useRealtimeKitClient()
 
   useEffect(() => {
@@ -55,13 +61,27 @@ function MeetingRoom({ authToken }: { authToken: string }) {
 
   return (
     <RealtimeKitProvider value={meeting}>
-      <Meeting />
+      <Meeting role={role} />
     </RealtimeKitProvider>
   )
 }
 
-function Meeting() {
+function Meeting({ role }: { role: ScreenVisitRole }) {
   const { meeting } = useRealtimeKitMeeting()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!meeting) return
+
+    function leave() {
+      navigate({ to: returnPath[role], replace: true })
+    }
+
+    meeting.self.on('roomLeft', leave)
+    return () => {
+      meeting.self.off('roomLeft', leave)
+    }
+  }, [meeting, navigate, role])
 
   if (!meeting) {
     return (

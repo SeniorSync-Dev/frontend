@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiRequest } from '../api'
 
+export type ScreenVisitRole = 'citizen' | 'employee' | 'relative'
+
 type JoinResponse = {
   token: string
-  role: 'citizen' | 'employee' | 'relative'
+  role: ScreenVisitRole
 }
 
 export function useJoinScreenVisit(appointmentId: string) {
