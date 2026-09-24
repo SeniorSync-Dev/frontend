@@ -6,13 +6,15 @@ import { getInitials } from '../../lib/initials'
 
 export const Route = createFileRoute('/auth/profile')({ component: Profile })
 
-function Profile() {
+async function Profile() {
   const navigate = useNavigate()
   const { data: session, isPending, error, refetch } = authClient.useSession()
   const [newEmail, setNewEmail] = useState('')
   const [isChangingEmail, setIsChangingEmail] = useState(false)
   const [emailChangeError, setEmailChangeError] = useState<string | null>(null)
   const [emailChangeSuccess, setEmailChangeSuccess] = useState<string | null>(null)
+  const { data: activeMemberRole } = authClient.useActiveMemberRole()
+  const role = activeMemberRole?.role ?? null
 
   function signOut() {
     authClient.signOut({
@@ -125,6 +127,10 @@ function Profile() {
                 <dd className="text-sm break-all sm:col-span-2">{item.value || '—'}</dd>
               </div>
             ))}
+            <div key="role" className="grid gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+                <dt className="text-sm font-medium text-muted">Rolle</dt>
+                <dd className="text-sm break-all sm:col-span-2">{role || '—'}</dd>
+              </div>
           </dl>
 
           <form className="mt-8 border-t border-border pt-6" onSubmit={changeEmail}>
