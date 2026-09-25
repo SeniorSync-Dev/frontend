@@ -232,7 +232,7 @@ function RouteComponent() {
       <Card>
         <Card.Header>
           <Card.Title>Inviter nyt medlem</Card.Title>
-          <Card.Description>Der sendes ingen e-mail — kopiér linket herunder og del det selv.</Card.Description>
+          <Card.Description>Der sendes ingen e-mail - kopiér linket herunder og del det selv.</Card.Description>
         </Card.Header>
         <Card.Content>
           <form onSubmit={handleInvite} className="flex flex-wrap items-end gap-3">

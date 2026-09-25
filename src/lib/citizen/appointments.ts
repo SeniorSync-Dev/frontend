@@ -1,7 +1,7 @@
 import type { Appointment, AppointmentType } from "#/models/appointment"
 
-export function nextAppointment(appointments: Appointment[]) {
-  return appointments[0] ?? null
+export function nextAppointment(appointments: Appointment[], now = new Date()) {
+  return appointments.find((appointment) => (appointment.end ?? appointment.start) >= now) ?? null
 }
 
 export const appointmentTypeLabel: Record<AppointmentType, string> = {
