@@ -30,6 +30,7 @@ import { Route as CitizenAppointmentsRouteImport } from './routes/citizen/appoin
 import { Route as CitizenRelativesRouteImport } from './routes/citizen/relatives'
 import { Route as RelativeIndexRouteImport } from './routes/relative/index'
 import { Route as RelativeCitizenIdRouteImport } from './routes/relative/$citizenId'
+import { Route as ScreenVisitAppointmentIdRouteImport } from './routes/screen-visit.$appointmentId'
 import { Route as ServicePartnerSigninRouteImport } from './routes/servicePartner/signin'
 import { Route as AuthAcceptInvitationInvitationIdRouteImport } from './routes/auth/accept-invitation.$invitationId'
 import { Route as RelativeCitizenIdIndexRouteImport } from './routes/relative/$citizenId/index'
@@ -141,6 +142,12 @@ const RelativeCitizenIdRoute = RelativeCitizenIdRouteImport.update({
   path: '/$citizenId',
   getParentRoute: () => RelativeRoute,
 } as any)
+const ScreenVisitAppointmentIdRoute =
+  ScreenVisitAppointmentIdRouteImport.update({
+    id: '/screen-visit/$appointmentId',
+    path: '/screen-visit/$appointmentId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ServicePartnerSigninRoute = ServicePartnerSigninRouteImport.update({
   id: '/servicePartner/signin',
   path: '/servicePartner/signin',
@@ -190,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/citizen/relatives': typeof CitizenRelativesRoute
   '/relative/$citizenId': typeof RelativeCitizenIdRouteWithChildren
+  '/screen-visit/$appointmentId': typeof ScreenVisitAppointmentIdRoute
   '/servicePartner/signin': typeof ServicePartnerSigninRoute
   '/citizen/': typeof CitizenIndexRoute
   '/relative/': typeof RelativeIndexRoute
@@ -215,6 +223,7 @@ export interface FileRoutesByTo {
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/citizen/relatives': typeof CitizenRelativesRoute
+  '/screen-visit/$appointmentId': typeof ScreenVisitAppointmentIdRoute
   '/servicePartner/signin': typeof ServicePartnerSigninRoute
   '/citizen': typeof CitizenIndexRoute
   '/relative': typeof RelativeIndexRoute
@@ -244,6 +253,7 @@ export interface FileRoutesById {
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/citizen/relatives': typeof CitizenRelativesRoute
   '/relative/$citizenId': typeof RelativeCitizenIdRouteWithChildren
+  '/screen-visit/$appointmentId': typeof ScreenVisitAppointmentIdRoute
   '/servicePartner/signin': typeof ServicePartnerSigninRoute
   '/citizen/': typeof CitizenIndexRoute
   '/relative/': typeof RelativeIndexRoute
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
     | '/citizen/appointments'
     | '/citizen/relatives'
     | '/relative/$citizenId'
+    | '/screen-visit/$appointmentId'
     | '/servicePartner/signin'
     | '/citizen/'
     | '/relative/'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/citizen/activities'
     | '/citizen/appointments'
     | '/citizen/relatives'
+    | '/screen-visit/$appointmentId'
     | '/servicePartner/signin'
     | '/citizen'
     | '/relative'
@@ -327,6 +339,7 @@ export interface FileRouteTypes {
     | '/citizen/appointments'
     | '/citizen/relatives'
     | '/relative/$citizenId'
+    | '/screen-visit/$appointmentId'
     | '/servicePartner/signin'
     | '/citizen/'
     | '/relative/'
@@ -344,6 +357,7 @@ export interface RootRouteChildren {
   AuthProfileRoute: typeof AuthProfileRoute
   AuthSigninRoute: typeof AuthSigninRoute
   AuthUnauthorizedRoute: typeof AuthUnauthorizedRoute
+  ScreenVisitAppointmentIdRoute: typeof ScreenVisitAppointmentIdRoute
   ServicePartnerSigninRoute: typeof ServicePartnerSigninRoute
   AuthAcceptInvitationInvitationIdRoute: typeof AuthAcceptInvitationInvitationIdRoute
 }
@@ -497,6 +511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RelativeCitizenIdRouteImport
       parentRoute: typeof RelativeRoute
     }
+    '/screen-visit/$appointmentId': {
+      id: '/screen-visit/$appointmentId'
+      path: '/screen-visit/$appointmentId'
+      fullPath: '/screen-visit/$appointmentId'
+      preLoaderRoute: typeof ScreenVisitAppointmentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/servicePartner/signin': {
       id: '/servicePartner/signin'
       path: '/servicePartner/signin'
@@ -613,6 +634,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthProfileRoute: AuthProfileRoute,
   AuthSigninRoute: AuthSigninRoute,
   AuthUnauthorizedRoute: AuthUnauthorizedRoute,
+  ScreenVisitAppointmentIdRoute: ScreenVisitAppointmentIdRoute,
   ServicePartnerSigninRoute: ServicePartnerSigninRoute,
   AuthAcceptInvitationInvitationIdRoute: AuthAcceptInvitationInvitationIdRoute,
 }

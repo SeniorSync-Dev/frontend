@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../api";
-import type { Visit, VisitOptions } from "../../models/visit";
+import type { Visit, VisitOptions, VisitType } from "../../models/visit";
 
 type CreateVisitInput = {
     citizenUserId: string;
+    type: VisitType;
     assignedEmployeeId?: string;
     title?: string;
     scheduledStart: string;

@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, Input } from '@heroui/react'
+import { Video } from 'lucide-react'
 import { useAssignVisit, useCreateVisit, useVisitOptions, useVisits } from '../../lib/admin/visits'
-import { visitStatusLabels } from '../../models/visit'
+import { visitStatusLabels, visitTypeLabels, type VisitType } from '../../models/visit'
 import { authClient } from '#/lib/auth-client'
 
 export const Route = createFileRoute('/admin/visits')({
@@ -54,6 +55,7 @@ function RouteComponent() {
   const createVisit = useCreateVisit()
   const assignVisit = useAssignVisit()
 
+  const [visitType, setVisitType] = useState<VisitType>('visit')
   const [title, setTitle] = useState('')
   const [citizenUserId, setCitizenUserId] = useState('')
   const [assignedEmployeeId, setAssignedEmployeeId] = useState('')
@@ -76,6 +78,7 @@ function RouteComponent() {
     createVisit.mutate(
       {
         citizenUserId,
+        type: visitType,
         assignedEmployeeId: assignedEmployeeId || undefined,
         title: title || undefined,
         scheduledStart,
@@ -83,6 +86,7 @@ function RouteComponent() {
       },
       {
         onSuccess: () => {
+          setVisitType('visit')
           setTitle('')
           setCitizenUserId('')
           setAssignedEmployeeId('')
@@ -114,8 +118,25 @@ function RouteComponent() {
         <Card.Content>
           <form onSubmit={handleCreate} className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Field label="Type">
+                <select
+                  className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+                  value={visitType}
+                  onChange={(e) => setVisitType(e.target.value as VisitType)}
+                >
+                  {Object.entries(visitTypeLabels).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
               <Field label="Titel">
-                <Input placeholder="Besøg" value={title} onChange={(e) => setTitle(e.target.value)} />
+                <Input
+                  placeholder={visitTypeLabels[visitType]}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
               </Field>
               <Field label="Borger">
                 <select
@@ -192,6 +213,11 @@ function RouteComponent() {
                   <div className="flex flex-col gap-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-medium">{visit.title}</p>
+                      {visit.type === 'call' && (
+                        <Chip variant="soft" color="accent" size="sm">
+                          <Chip.Label>{visitTypeLabels.call}</Chip.Label>
+                        </Chip>
+                      )}
                       <Chip variant="soft" color="accent" size="sm">
                         <Chip.Label>{visitStatusLabels[visit.status]}</Chip.Label>
                       </Chip>
@@ -221,7 +247,7 @@ function RouteComponent() {
                     </p>
                   </div>
 
-                  {isUnassigned && (
+                  {isUnassigned ? (
                     <Button
                       variant="primary"
                       size="sm"
@@ -230,6 +256,18 @@ function RouteComponent() {
                     >
                       Tildel mig
                     </Button>
+                  ) : (
+                    visit.type === 'call' &&
+                    visit.canJoin && (
+                      <Link
+                        to="/screen-visit/$appointmentId"
+                        params={{ appointmentId: visit.id }}
+                        className="flex items-center gap-2 rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground no-underline hover:opacity-90"
+                      >
+                        <Video className="size-4" aria-hidden />
+                        Deltag
+                      </Link>
+                    )
                   )}
                 </div>
               )

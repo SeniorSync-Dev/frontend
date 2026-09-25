@@ -11,6 +11,7 @@ interface Appointment {
   staffName?: string
   createdByUserId?: string
   isCompleted?: boolean
+  canJoin?: boolean
 }
 
 export type { AppointmentType, Appointment };
