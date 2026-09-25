@@ -2,10 +2,11 @@ import { Avatar, Spinner } from '@heroui/react'
 import { Link, Outlet, createFileRoute, redirect, useLocation } from '@tanstack/react-router'
 import { authClient } from '../lib/auth-client'
 import { getInitials } from '../lib/initials'
+import { BuildingComplex, MopSparkles, Siren, BellRing, Cpu, House, SportShoe} from 'lucide-react'
 
 export const Route = createFileRoute('/admin')({
   beforeLoad: async ({ location }) => {
-    // The sign-in screen must remain public so an unauthenticated visitor can sign in.
+    // We have to leave the signin page unprotected else users cannot signin
     if (location.pathname === '/admin/signin') return
 
     const { data: session } = await authClient.getSession()
@@ -16,8 +17,8 @@ export const Route = createFileRoute('/admin')({
     const { data } = await authClient.organization.getActiveMemberRole();
     const userRole = data?.role;
 
-    if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee')) {
-      throw redirect({ to: '/' })
+    if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee' && userRole !== 'servicePartner')) {
+      throw redirect({ to: '/auth/unauthorized' })
     }
   },
   component: AdminLayout,
@@ -61,23 +62,31 @@ function AdminLayout() {
                 activeProps={{ className: activeNavClassName }}
                 activeOptions={{ exact: true }}
               >
-                <DashboardIcon />
+                <BuildingComplex/>
                 Organisation
               </Link>
               <Link to="/admin/visits" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
+                <MopSparkles/>
                 Besøg
               </Link>
               <Link to="/admin/kioskPage" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
-                Alarmoversigt
+                <Siren />
+                Alarmoversigt (Kiosk Side)
+              </Link>
+              <Link to="/admin/sensor-events" className={navClassName} activeProps={{ className: activeNavClassName }}>
+                <BellRing />
+                Sensorhændelser
+              </Link>
+              <Link to="/admin/sensors" className={navClassName} activeProps={{ className: activeNavClassName }}>
+                <Cpu />
+                Sensorer
               </Link>
               <Link to="/admin/facilities" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
+                <House/>
                 Faciliteter
               </Link>
               <Link to="/admin/activities" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
+                <SportShoe />
                 Aktiviteter
               </Link>
             </nav>
@@ -86,7 +95,7 @@ function AdminLayout() {
             <nav aria-label="Service Partner" className="flex flex-col gap-1">
               <p className="px-3 pb-2 text-xs font-semibold tracking-wider text-muted uppercase">Service Partner</p>
               <Link to="/admin/activities" className={navClassName} activeProps={{ className: activeNavClassName }}>
-                <AlarmIcon />
+                <SportShoe />
                 Service Partner
               </Link>
             </nav>
@@ -127,24 +136,5 @@ function AdminLayout() {
         <Outlet />
       </div>
     </div>
-  )
-}
-
-function DashboardIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-    </svg>
-  )
-}
-
-function AlarmIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 9v4m0 4h.01M10.3 3.5 2.2 18a2 2 0 0 0 1.75 3h16.1A2 2 0 0 0 21.8 18L13.7 3.5a2 2 0 0 0-3.4 0Z" />
-    </svg>
   )
 }

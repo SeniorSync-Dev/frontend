@@ -7,7 +7,7 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   const { pathname } = useLocation()
-  const isCitizenArea = pathname.startsWith('/citizen')
+  const isArea = pathname.startsWith('/citizen') || pathname.startsWith('/relative')
 
   const startYear = 2026
   const currentYear = new Date().getFullYear()
@@ -18,7 +18,7 @@ function RootComponent() {
       <main className="flex flex-1 flex-col">
         <Outlet />
       </main>
-      {!isCitizenArea && (
+      {!isArea && (
         <footer className="border-t border-border py-6 text-center text-sm text-muted">
           © {yearRange} SeniorSync
         </footer>

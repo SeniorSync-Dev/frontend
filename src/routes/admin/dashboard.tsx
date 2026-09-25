@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
 import { Alert, Button, Card, Input, Spinner } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
 import { useFacilities } from '../../lib/admin/facilities'
@@ -15,6 +15,20 @@ import type { OrgRole } from '../../models/organization'
 import type { Facility } from '../../models/facility'
 
 export const Route = createFileRoute('/admin/dashboard')({
+  beforeLoad: async () => {
+  
+      const { data: session } = await authClient.getSession()
+      if (!session) {
+        throw redirect({ to: '/admin/signin' })
+      }
+  
+      const { data } = await authClient.organization.getActiveMemberRole();
+      const userRole = data?.role;
+  
+      if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee')) {
+        throw redirect({ to: '/auth/unauthorized' })
+      }
+    },
   component: RouteComponent,
 })
 
@@ -232,7 +246,7 @@ function RouteComponent() {
       <Card>
         <Card.Header>
           <Card.Title>Inviter nyt medlem</Card.Title>
-          <Card.Description>Der sendes ingen e-mail — kopiér linket herunder og del det selv.</Card.Description>
+          <Card.Description>Der sendes ingen e-mail - kopiér linket herunder og del det selv.</Card.Description>
         </Card.Header>
         <Card.Content>
           <form onSubmit={handleInvite} className="flex flex-wrap items-end gap-3">

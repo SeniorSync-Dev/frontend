@@ -1,11 +1,26 @@
 import { useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, Input } from '@heroui/react'
 import { Video } from 'lucide-react'
 import { useAssignVisit, useCreateVisit, useVisitOptions, useVisits } from '../../lib/admin/visits'
 import { visitStatusLabels, visitTypeLabels, type VisitType } from '../../models/visit'
+import { authClient } from '#/lib/auth-client'
 
 export const Route = createFileRoute('/admin/visits')({
+  beforeLoad: async () => {
+    
+        const { data: session } = await authClient.getSession()
+        if (!session) {
+          throw redirect({ to: '/admin/signin' })
+        }
+    
+        const { data } = await authClient.organization.getActiveMemberRole();
+        const userRole = data?.role;
+    
+        if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee')) {
+          throw redirect({ to: '/auth/unauthorized' })
+        }
+      },
   component: RouteComponent,
 })
 

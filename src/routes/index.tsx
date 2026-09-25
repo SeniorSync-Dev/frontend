@@ -1,7 +1,16 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
 import { Button } from '@heroui/react'
+import { authClient } from '#/lib/auth-client'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({
+  beforeLoad: async () => {
+    const { data: session } = await authClient.getSession()
+    if (session) {
+      throw redirect({ to: '/auth/profile' })
+    }
+  },
+  component: Home
+})
 
 function Home() {
   const navigate = useNavigate()
@@ -29,6 +38,22 @@ function Home() {
           >
             Log ind som pårørende
           </Button>
+        </div>
+
+        <div className="mt-6 flex flex-col items-center gap-2 text-sm text-muted">
+          <span>Er du medarbejder eller servicepartner?</span>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onPress={() => navigate({ to: '/admin/signin' })}>
+              Medarbejder
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onPress={() => navigate({ to: '/servicePartner/signin' })}
+            >
+              Servicepartner
+            </Button>
+          </div>
         </div>
       </section>
     </div>
