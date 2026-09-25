@@ -9,6 +9,8 @@ interface Appointment {
   end?: Date
   location?: string
   staffName?: string
+  createdByUserId?: string
+  isCompleted?: boolean
 }
 
 export type { AppointmentType, Appointment };

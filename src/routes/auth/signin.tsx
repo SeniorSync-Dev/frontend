@@ -51,7 +51,7 @@ function Signin() {
   function signInWithMitID() {
     authClient.signIn.social({
       provider: 'mitid',
-      callbackURL: `${window.location.origin}${loginAs === 'borger' ? '/citizen' : '/auth/profile'}`,
+      callbackURL: `${window.location.origin}${loginAs === 'borger' ? '/citizen' : '/relative'}`,
       errorCallbackURL: `${window.location.origin}/auth/signin`,
       additionalData: {
         accountType: loginAs ? loginAsAccountType[loginAs] : 'relative',

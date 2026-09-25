@@ -1,17 +1,25 @@
 import { useState } from 'react'
 import { createFileRoute, Navigate } from '@tanstack/react-router'
 import { Alert, Card, Chip, EmptyState, Input, Spinner, TextArea } from '@heroui/react'
-import { CalendarDays, Check, MapPin, Video, type LucideIcon } from 'lucide-react'
+import { CalendarDays, Check, CircleCheck, MapPin, Video, type LucideIcon } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
 import { useAppointments, useBookVisit, useCancelActivitySignup } from '../../lib/citizen/api'
 import { appointmentTypeLabel } from '../../lib/citizen/appointments'
 import { Button } from '../../lib/citizen/Button'
-import { formatDateLabel, formatTime, formatTimeRange } from '../../lib/citizen/format'
+import { formatDateLabel, formatTime, formatTimeRange } from '../../lib/format'
+import { ListPagination, pageCountOf, pageSlice } from '../../lib/ListPagination'
+import { useNow } from '../../lib/useNow'
 import type { AppointmentType, Appointment } from '#/models/appointment'
+
+const APPOINTMENTS_PER_PAGE = 4
 
 export const Route = createFileRoute('/citizen/appointments')({
   component: Appointments,
 })
+
+function isOver(appointment: Appointment, now: Date) {
+  return (appointment.end ?? appointment.start) < now
+}
 
 function Appointments() {
   const { data: organizations, isPending: isOrganizationsPending } = authClient.useListOrganizations()
@@ -19,6 +27,8 @@ function Appointments() {
 
   const { data: appointments, error, refetch } = useAppointments()
   const cancelMutation = useCancelActivitySignup()
+  const now = useNow()
+  const [selectedPage, setSelectedPage] = useState<number | null>(null)
 
   if (isOrganizationsPending || (careHome && !appointments && !error)) {
     return (
@@ -50,6 +60,14 @@ function Appointments() {
   }
 
   const upcoming = appointments ?? []
+  const nextIndex = upcoming.findIndex((appointment) => !isOver(appointment, now))
+  const next = nextIndex === -1 ? undefined : upcoming[nextIndex]
+
+  const defaultPage = nextIndex === -1 ? 1 : Math.floor(nextIndex / APPOINTMENTS_PER_PAGE) + 1
+  const page = Math.min(
+    selectedPage ?? defaultPage,
+    pageCountOf(upcoming.length, APPOINTMENTS_PER_PAGE),
+  )
 
   return (
     <>
@@ -77,16 +95,26 @@ function Appointments() {
         </EmptyState>
       ) : (
         <>
-          <p className="text-2xl text-muted">Her er dine næste aftaler - én ad gangen:</p>
-          {upcoming.map((appointment, index) => (
+          <p className="text-2xl text-muted">Her er dine aftaler de næste 14 dage:</p>
+          {pageSlice(upcoming, page, APPOINTMENTS_PER_PAGE).map((appointment) => (
             <AppointmentCard
               key={appointment.id}
               appointment={appointment}
-              highlighted={index === 0}
+              highlighted={appointment === next}
+              isFinished={isOver(appointment, now)}
               isCancelling={cancelMutation.isPending && cancelMutation.variables === appointment.id}
               onCancel={() => cancelMutation.mutate(appointment.id)}
             />
           ))}
+
+          <ListPagination
+            page={page}
+            itemCount={upcoming.length}
+            label="aftaler"
+            pageSize={APPOINTMENTS_PER_PAGE}
+            size="lg"
+            onPageChange={setSelectedPage}
+          />
         </>
       )}
     </>
@@ -199,11 +227,13 @@ const typeChipColor: Record<AppointmentType, 'accent' | 'success'> = {
 function AppointmentCard({
   appointment,
   highlighted,
+  isFinished,
   isCancelling,
   onCancel,
 }: {
   appointment: Appointment
   highlighted: boolean
+  isFinished: boolean
   isCancelling: boolean
   onCancel: () => void
 }) {
@@ -213,7 +243,11 @@ function AppointmentCard({
     .join(' · ')
 
   return (
-    <Card className={`flex-row flex-wrap items-center gap-6 sm:flex-nowrap ${highlighted ? 'border-2 border-accent' : ''}`}>
+    <Card
+      className={`flex-row flex-wrap items-center gap-6 sm:flex-nowrap ${
+        highlighted ? 'border-2 border-accent' : ''
+      } ${isFinished ? 'opacity-60' : ''}`}
+    >
       <div className="flex size-21 flex-none flex-col items-center justify-center rounded-xl bg-accent-soft text-accent">
         <span className="text-base font-bold uppercase">{formatDateLabel(appointment.start)}</span>
         <span className="text-2xl font-extrabold text-foreground">{formatTime(appointment.start)}</span>
@@ -228,11 +262,18 @@ function AppointmentCard({
       </Card.Content>
 
       <div className="flex flex-none flex-col items-end gap-2">
-        <Chip color={typeChipColor[appointment.type]} variant="soft" size="lg" className="gap-2">
-          <Icon className="size-5" strokeWidth={appointment.type === 'activity' ? 3 : 2} aria-hidden />
-          <Chip.Label>{appointmentTypeLabel[appointment.type]}</Chip.Label>
-        </Chip>
-        {appointment.type === 'activity' && (
+        {appointment.isCompleted ? (
+          <Chip color="success" variant="soft" size="lg" className="gap-2">
+            <CircleCheck className="size-5" aria-hidden />
+            <Chip.Label>Udført</Chip.Label>
+          </Chip>
+        ) : (
+          <Chip color={typeChipColor[appointment.type]} variant="soft" size="lg" className="gap-2">
+            <Icon className="size-5" strokeWidth={appointment.type === 'activity' ? 3 : 2} aria-hidden />
+            <Chip.Label>{appointmentTypeLabel[appointment.type]}</Chip.Label>
+          </Chip>
+        )}
+        {appointment.type === 'activity' && !isFinished && (
           <Button
             variant="ghost"
             className="h-12 rounded-xl px-4 text-lg font-semibold text-accent underline underline-offset-4"
