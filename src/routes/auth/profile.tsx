@@ -8,7 +8,6 @@ export const Route = createFileRoute('/auth/profile')({ component: Profile })
 
 function Profile() {
   const navigate = useNavigate()
-  const router = useRouter()
   const { data: session, isPending, error, refetch } = authClient.useSession()
   const [newEmail, setNewEmail] = useState('')
   const [isChangingEmail, setIsChangingEmail] = useState(false)
@@ -16,14 +15,6 @@ function Profile() {
   const [emailChangeSuccess, setEmailChangeSuccess] = useState<string | null>(null)
   const { data: activeMemberRole } = authClient.useActiveMemberRole()
   const role = activeMemberRole?.role ?? null
-
-  function goBack() {
-    if (router.history.canGoBack()) {
-      router.history.back()
-    } else {
-      navigate({ to: '/' })
-    }
-  }
 
   function signOut() {
     authClient.signOut()
@@ -39,8 +30,7 @@ function Profile() {
         navigate({ to: '/admin/activities' })
         return
       case 'relative':
-        //TODO navigate({ to: '/relative' }) when its implemented
-        window.location.assign('/relative/')
+        navigate({ to: '/relative' })
         return
       case 'citizen':
         navigate({ to: '/citizen' })
@@ -133,11 +123,6 @@ function Profile() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
-      <Button variant="ghost" className="mb-4" onPress={goBack}>
-        <ArrowLeft className="size-4" aria-hidden />
-        Tilbage
-      </Button>
-
       <Card>
         <Card.Header className="flex-row items-center gap-4">
           <Avatar size="lg" color="accent">
@@ -221,13 +206,6 @@ function Profile() {
           <Button variant="danger-soft" onPress={signOut}>
             Log ud
           </Button>
-
-          <div className="flex gap-2">
-            <Button variant="ghost" onPress={() => refetch()}>
-              Opdater
-            </Button>
-            <EditProfileModal name={user.name} email={user.email} onSaved={refetch} />
-          </div>
         </Card.Footer>
       </Card>
     </div>
