@@ -23,6 +23,7 @@ import { Route as AdminSigninRouteImport } from './routes/admin/signin'
 import { Route as AdminVisitsRouteImport } from './routes/admin/visits'
 import { Route as AuthProfileRouteImport } from './routes/auth/profile'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
+import { Route as AuthUnauthorizedRouteImport } from './routes/auth/unauthorized'
 import { Route as CitizenIndexRouteImport } from './routes/citizen/index'
 import { Route as CitizenActivitiesRouteImport } from './routes/citizen/activities'
 import { Route as CitizenAppointmentsRouteImport } from './routes/citizen/appointments'
@@ -105,6 +106,11 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
   path: '/auth/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthUnauthorizedRoute = AuthUnauthorizedRouteImport.update({
+  id: '/auth/unauthorized',
+  path: '/auth/unauthorized',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CitizenIndexRoute = CitizenIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/auth/unauthorized': typeof AuthUnauthorizedRoute
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/citizen/relatives': typeof CitizenRelativesRoute
@@ -204,6 +211,7 @@ export interface FileRoutesByTo {
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/auth/unauthorized': typeof AuthUnauthorizedRoute
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/citizen/relatives': typeof CitizenRelativesRoute
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/admin/visits': typeof AdminVisitsRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/signin': typeof AuthSigninRoute
+  '/auth/unauthorized': typeof AuthUnauthorizedRoute
   '/citizen/activities': typeof CitizenActivitiesRoute
   '/citizen/appointments': typeof CitizenAppointmentsRoute
   '/citizen/relatives': typeof CitizenRelativesRoute
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/admin/visits'
     | '/auth/profile'
     | '/auth/signin'
+    | '/auth/unauthorized'
     | '/citizen/activities'
     | '/citizen/appointments'
     | '/citizen/relatives'
@@ -285,6 +295,7 @@ export interface FileRouteTypes {
     | '/admin/visits'
     | '/auth/profile'
     | '/auth/signin'
+    | '/auth/unauthorized'
     | '/citizen/activities'
     | '/citizen/appointments'
     | '/citizen/relatives'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/admin/visits'
     | '/auth/profile'
     | '/auth/signin'
+    | '/auth/unauthorized'
     | '/citizen/activities'
     | '/citizen/appointments'
     | '/citizen/relatives'
@@ -331,6 +343,7 @@ export interface RootRouteChildren {
   RelativeRoute: typeof RelativeRouteWithChildren
   AuthProfileRoute: typeof AuthProfileRoute
   AuthSigninRoute: typeof AuthSigninRoute
+  AuthUnauthorizedRoute: typeof AuthUnauthorizedRoute
   ServicePartnerSigninRoute: typeof ServicePartnerSigninRoute
   AuthAcceptInvitationInvitationIdRoute: typeof AuthAcceptInvitationInvitationIdRoute
 }
@@ -433,6 +446,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/signin'
       fullPath: '/auth/signin'
       preLoaderRoute: typeof AuthSigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/unauthorized': {
+      id: '/auth/unauthorized'
+      path: '/auth/unauthorized'
+      fullPath: '/auth/unauthorized'
+      preLoaderRoute: typeof AuthUnauthorizedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/citizen/': {
@@ -592,6 +612,7 @@ const rootRouteChildren: RootRouteChildren = {
   RelativeRoute: RelativeRouteWithChildren,
   AuthProfileRoute: AuthProfileRoute,
   AuthSigninRoute: AuthSigninRoute,
+  AuthUnauthorizedRoute: AuthUnauthorizedRoute,
   ServicePartnerSigninRoute: ServicePartnerSigninRoute,
   AuthAcceptInvitationInvitationIdRoute: AuthAcceptInvitationInvitationIdRoute,
 }

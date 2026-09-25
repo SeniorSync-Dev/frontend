@@ -1,11 +1,26 @@
 import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Alert, Button, Card, Input } from '@heroui/react'
 import { useCreateFacility, useFacilities } from '../../lib/admin/facilities'
 import { facilityTypeLabels } from '../../models/facility'
 import type { FacilityType } from '../../models/facility'
+import { authClient } from '#/lib/auth-client'
 
 export const Route = createFileRoute('/admin/facilities')({
+  beforeLoad: async () => {
+    
+        const { data: session } = await authClient.getSession()
+        if (!session) {
+          throw redirect({ to: '/admin/signin' })
+        }
+    
+        const { data } = await authClient.organization.getActiveMemberRole();
+        const userRole = data?.role;
+    
+        if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee')) {
+          throw redirect({ to: '/auth/unauthorized' })
+        }
+      },
   component: RouteComponent,
 })
 

@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useQueries } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Alert, Button, Card, Chip, EmptyState, Modal, Spinner, useOverlayState } from '@heroui/react'
 import { Check, ClipboardCheck, RefreshCw } from 'lucide-react'
+import { authClient } from '../../lib/auth-client'
 import {
   sensorEventsQueryOptions,
   useAcknowledgeSensorEvent,
@@ -10,7 +11,24 @@ import {
 } from '../../lib/admin/sensorEvent'
 import type { SensorEvent, SensorEventSeverity, SensorEventStatus } from '../../models/sensorEvent'
 
-export const Route = createFileRoute('/admin/sensor-events')({ component: SensorEventsPage })
+export const Route = createFileRoute('/admin/sensor-events')({ 
+  beforeLoad: async () => {
+    
+        const { data: session } = await authClient.getSession()
+        if (!session) {
+          throw redirect({ to: '/admin/signin' })
+        }
+    
+        const { data } = await authClient.organization.getActiveMemberRole();
+        const userRole = data?.role;
+    
+        if (!data || (userRole !== 'systemAdmin' && userRole !== 'employee')) {
+          throw redirect({ to: '/auth/unauthorized' })
+        }
+      },
+  component: SensorEventsPage 
+
+  })
 
 const queryPageSize = 100
 const visiblePageSize = 20

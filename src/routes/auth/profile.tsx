@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
-import { Alert, AlertDialog, Avatar, Button, Card, Spinner } from '@heroui/react'
-import { ArrowLeft, Pencil } from 'lucide-react'
+import { useState, type SubmitEvent } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Alert, Avatar, Button, Card, Input, Spinner } from '@heroui/react'
 import { authClient } from '../../lib/auth-client'
 import { getInitials } from '../../lib/initials'
 
@@ -11,6 +10,12 @@ function Profile() {
   const navigate = useNavigate()
   const router = useRouter()
   const { data: session, isPending, error, refetch } = authClient.useSession()
+  const [newEmail, setNewEmail] = useState('')
+  const [isChangingEmail, setIsChangingEmail] = useState(false)
+  const [emailChangeError, setEmailChangeError] = useState<string | null>(null)
+  const [emailChangeSuccess, setEmailChangeSuccess] = useState<string | null>(null)
+  const { data: activeMemberRole } = authClient.useActiveMemberRole()
+  const role = activeMemberRole?.role ?? null
 
   function goBack() {
     if (router.history.canGoBack()) {
@@ -21,10 +26,49 @@ function Profile() {
   }
 
   function signOut() {
-    authClient.signOut({
+    authClient.signOut()
+  }
+
+  function goBack() {
+    switch (role) {
+      case 'employee':
+      case 'systemAdmin':
+        navigate({ to: '/admin/dashboard' })
+        return
+      case 'servicePartner':
+        navigate({ to: '/admin/activities' })
+        return
+      case 'relative':
+        //TODO navigate({ to: '/relative' }) when its implemented
+        window.location.assign('/relative/')
+        return
+      case 'citizen':
+        navigate({ to: '/citizen' })
+        return
+      default:
+        navigate({ to: '/' })
+    }
+  }
+
+  function changeEmail(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setEmailChangeError(null)
+    setEmailChangeSuccess(null)
+
+    authClient.changeEmail({
+      newEmail,
+      callbackURL: '/auth/profile',
       fetchOptions: {
-        // TODO: This still doens't work because it sendes us to signicat logout page instead.
-        onSuccess: () => navigate({ to: '/auth/signin' }),
+        onRequest: () => setIsChangingEmail(true),
+        onSuccess: async () => {
+          await refetch()
+          setNewEmail('')
+          setEmailChangeSuccess('Din e-mailadresse er blevet opdateret.')
+        },
+        onError: (ctx) => {
+          setEmailChangeError(ctx.error.message || 'E-mailadressen kunne ikke opdateres. Prøv igen.')
+        },
+        onResponse: () => setIsChangingEmail(false),
       },
     })
   }
@@ -51,7 +95,7 @@ function Profile() {
           <Button variant="secondary" onPress={() => refetch()}>
             Prøv igen
           </Button>
-          <Button variant="primary" onPress={() => navigate({ to: '/auth/signin' })}>
+          <Button variant="primary" onPress={() => navigate({ to: '/' })}>
             Log ind
           </Button>
         </div>
@@ -68,7 +112,7 @@ function Profile() {
             <Card.Description>Log ind med MitID for at se din profil.</Card.Description>
           </Card.Header>
           <Card.Footer className="justify-center">
-            <Button variant="primary" onPress={() => navigate({ to: '/auth/signin' })}>
+            <Button variant="primary" onPress={() => navigate({ to: '/' })}>
               Log ind med MitID
             </Button>
           </Card.Footer>
@@ -113,10 +157,67 @@ function Profile() {
                 <dd className="text-sm break-all sm:col-span-2">{item.value || '-'}</dd>
               </div>
             ))}
+            <div key="role" className="grid gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+                <dt className="text-sm font-medium text-muted">Rolle</dt>
+                <dd className="text-sm break-all sm:col-span-2">{role || '—'}</dd>
+              </div>
           </dl>
+
+          <form className="mt-8 border-t border-border pt-6" onSubmit={changeEmail}>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-base font-semibold">Skift e-mailadresse</h2>
+              <p className="text-sm text-muted">Indtast den e-mailadresse, du fremover vil bruge.</p>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+              <label className="flex flex-1 flex-col gap-1.5 text-sm font-medium">
+                Ny e-mailadresse
+                <Input
+                  type="email"
+                  value={newEmail}
+                  onChange={(event) => setNewEmail(event.target.value)}
+                  placeholder="navn@eksempel.dk"
+                  autoComplete="email"
+                  required
+                  fullWidth
+                />
+              </label>
+              <Button type="submit" variant="primary" isPending={isChangingEmail}>
+                Skift e-mail
+              </Button>
+            </div>
+
+            {emailChangeError && (
+              <Alert className="mt-4" status="danger">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>Kunne ikke skifte e-mailadresse</Alert.Title>
+                  <Alert.Description>{emailChangeError}</Alert.Description>
+                </Alert.Content>
+              </Alert>
+            )}
+
+            {emailChangeSuccess && (
+              <Alert className="mt-4" status="success">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>E-mailadresse opdateret</Alert.Title>
+                  <Alert.Description>{emailChangeSuccess}</Alert.Description>
+                </Alert.Content>
+              </Alert>
+            )}
+          </form>
         </Card.Content>
 
         <Card.Footer className="flex-wrap justify-between gap-2">
+          <div className="flex gap-2">
+            <Button variant="secondary" onPress={goBack}>
+              Tilbage Til App
+            </Button>
+            <Button variant="ghost" onPress={() => refetch()}>
+              Opdater
+            </Button>
+          </div>
           <Button variant="danger-soft" onPress={signOut}>
             Log ud
           </Button>
@@ -130,111 +231,5 @@ function Profile() {
         </Card.Footer>
       </Card>
     </div>
-  )
-}
-
-function EditProfileModal({
-  name: currentName,
-  email: currentEmail,
-  onSaved,
-}: {
-  name: string
-  email: string
-  onSaved: () => void
-}) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [name, setName] = useState(currentName)
-  const [email, setEmail] = useState(currentEmail)
-  const [isSaving, setIsSaving] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
-
-  function open() {
-    setName(currentName)
-    setEmail(currentEmail)
-    setSaveError(null)
-    setIsOpen(true)
-  }
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault()
-    setIsSaving(true)
-    setSaveError(null)
-
-    if (name !== currentName) {
-      const { error: nameError } = await authClient.updateUser({ name })
-      if (nameError) {
-        setIsSaving(false)
-        setSaveError(nameError.message ?? 'Kunne ikke gemme navnet.')
-        return
-      }
-    }
-
-    if (email !== currentEmail) {
-      const { error: emailError } = await authClient.changeEmail({ newEmail: email })
-      if (emailError) {
-        setIsSaving(false)
-        setSaveError(emailError.message ?? 'Kunne ikke ændre e-mailen.')
-        return
-      }
-    }
-
-    setIsSaving(false)
-    onSaved()
-    setIsOpen(false)
-  }
-
-  return (
-    <AlertDialog isOpen={isOpen} onOpenChange={setIsOpen}>
-      <Button variant="primary" onPress={open}>
-        <Pencil className="size-4" aria-hidden />
-        Rediger profil
-      </Button>
-
-      <AlertDialog.Backdrop isDismissable isKeyboardDismissDisabled={false}>
-        <AlertDialog.Container>
-          <AlertDialog.Dialog className="gap-4">
-            <AlertDialog.Header>
-              <AlertDialog.Heading className="text-xl font-bold">Rediger profil</AlertDialog.Heading>
-            </AlertDialog.Header>
-
-            <AlertDialog.Body>
-              <form id="edit-profile-form" onSubmit={submit} className="flex flex-col gap-3">
-                <label className="flex flex-col gap-1">
-                  <span className="text-xs font-medium text-muted">Navn</span>
-                  <input
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="rounded-md border border-border bg-background px-3 py-2 text-sm"
-                  />
-                </label>
-
-                <label className="flex flex-col gap-1">
-                  <span className="text-xs font-medium text-muted">E-mail</span>
-                  <input
-                    required
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="rounded-md border border-border bg-background px-3 py-2 text-sm"
-                  />
-                </label>
-
-                {saveError && <p className="text-sm text-danger">{saveError}</p>}
-              </form>
-            </AlertDialog.Body>
-
-            <AlertDialog.Footer>
-              <Button slot="close" variant="outline">
-                Annuller
-              </Button>
-              <Button type="submit" form="edit-profile-form" variant="primary" isPending={isSaving}>
-                Gem
-              </Button>
-            </AlertDialog.Footer>
-          </AlertDialog.Dialog>
-        </AlertDialog.Container>
-      </AlertDialog.Backdrop>
-    </AlertDialog>
   )
 }
